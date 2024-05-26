@@ -1,5 +1,7 @@
 package backprop
 
+
+
 func  update(input []float64, target, learningRate float64) {
 	// Calculate the output of the neuron
 	output := n.forward(input)
