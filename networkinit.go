@@ -1,7 +1,5 @@
 package nnfcgolang
 
-import "nnfcgolang/activation"
-
 //intresting function for weight
 func BinaryCount(n int) int {
 	count := 0
@@ -36,18 +34,18 @@ model.saveAs("model.toml")
 type Neuron struct {
 	Len     int
 	Input   float32
-	Bias    float32
 	Cost    float32
+	Bias    *[]float32
 	Weights *[]float32 // use it as a and gate instead of float64
 }
 
 type FCLayer struct {
 	Len          int
 	Cost         float32
-	Activation   activation.Activation
 	LearningRate float32
 	Gradient     float32
 	Neurons      *[]Neuron
+	Activation   func(x []float64) []float64
 }
 
 type Output struct {
@@ -74,11 +72,11 @@ func NewNetwork() Chain {
 	return Chain{Len: 0, Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f activation.Activation) Chain {
+func (c Chain) FCLayer(n int, next int, f func(x []float64) []float64) Chain {
 	if c.Len == 0 {
 		L := new([]Neuron)
 		for i := 0; i < n; i++ {
-			*L = append(*L, Neuron{Len: next, Input: 0, Bias: 0, Cost: 0, Weights: new([]float32)})
+			*L = append(*L, Neuron{Len: next, Input: 0, Bias: new([]float32), Cost: 0, Weights: new([]float32)})
 		}
 		// add a layer
 		*c.Layers = append(*c.Layers, FCLayer{Len: n, Neurons: L, Activation: f})
@@ -93,7 +91,7 @@ func (c Chain) FCLayer(n int, next int, f activation.Activation) Chain {
 
 	L := new([]Neuron)
 	for i := 0; i < n; i++ {
-		*L = append(*L, Neuron{Len: next, Input: 0, Bias: 0, Cost: 0, Weights: new([]float32)})
+		*L = append(*L, Neuron{Len: next, Input: 0, Bias: new([]float32), Cost: 0, Weights: new([]float32)})
 	}
 
 	// add a layer
@@ -102,7 +100,7 @@ func (c Chain) FCLayer(n int, next int, f activation.Activation) Chain {
 	return c
 }
 
-func (c Chain) Output(n int, f activation.Activation) Chain {
+func (c Chain) Output(n int, f func(x []float64) []float64) Chain {
 	if (*(*c.Layers)[c.Len-1].Neurons)[0].Len != n {
 		panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
 	}
