@@ -1,39 +1,34 @@
 package nnfcgolang
 
-import "errors"
-
 // target function
 /*
 	output,err:=network.Predict(data)
 */
+// one data at a time
+func (c Chain) Predict(data []float32) []float32 {
+	for i, _ := range *c.Layers {
+		data = c.predict(data, i)
+	}
+	return data
+}
 
-func (c Chain) Predict(data []float32) ([]float32, error) {
-	//input layer
-	if len(data) != (*c.Layers)[0].Len {
-		return nil, errors.New("data length not match input layer")
-	}
-	//hidden layer
-	for i, v := range *c.Layers {
-		if i == 0 {
-			for j, _ := range *v.Neurons {
-				(*v.Neurons)[j].Input = data[j]
-			}
-		} else {
-			for j, _ := range *v.Neurons {
-				(*v.Neurons)[j].Input = 0
-				for k, _ := range *(*c.Layers)[i-1].Neurons {
-					(*v.Neurons)[j].Input += (*(*c.Layers)[i-1].Neurons)[k].Input * (*(*(*c.Layers)[i-1].Neurons)[k].Weights)[j]
-				}
-			}
-		}
-		//output layer
-		if i == len(*c.Layers)-1 {
-			output := make([]float32, len(*v.Neurons))
-			for j, _ := range *v.Neurons {
-				output[j] = (*v.Neurons)[j].Input
-			}
-			return output, nil
+func (c Chain) predict(data []float32, index int) []float32 {
+
+	for _, n := range *(*c.Layers)[index].Neurons {
+		i := 0
+		thisData := data[i]
+		data[i] = (*n.Weights)[i] * thisData
+		i++
+		for i < (*c.Layers)[index].NextLen {
+			data[i] *= (*n.Weights)[i] * thisData
+			i++
 		}
 	}
-	return nil, errors.New("predict error")
+	for i, b := range *(*c.Layers)[index].Bias {
+		data[i] += b
+	}
+	data = (*c.Layers)[index].Activation(data[:(*c.Layers)[index].NextLen])
+	print(len(data), "\n")
+
+	return data
 }

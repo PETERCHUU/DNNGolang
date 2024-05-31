@@ -32,33 +32,24 @@ model.saveAs("model.toml")
 
 // float32 ready for CUDA
 type Neuron struct {
-	Len     int
-	Input   float32
 	Cost    float32
-	Bias    *[]float32
-	Weights *[]float32 // use it as a and gate instead of float64
+	Weights *[]float32 // len is number of next layer
 }
 
 type FCLayer struct {
-	Len          int
+	NextLen      int
 	Cost         float32
 	LearningRate float32
 	Gradient     float32
-	Neurons      *[]Neuron
-	Activation   func(x []float64) []float64
-}
-
-type Output struct {
-	Len    int
-	Cost   float32
-	Output *[]float32
+	Bias         *[]float32 // len is number of next layer
+	Neurons      *[]Neuron  // len is number of this layer
+	Activation   func(x []float32) []float32
 }
 
 type Chain struct {
-	Len     int
 	Cost    float32
 	Layers  *[]FCLayer
-	Outputs *Output
+	Outputs func(x []float32) []float32
 }
 
 //FCinit(30,16,activation.Sigmoid)
@@ -69,43 +60,29 @@ FCLayer(8,4,activation.Sigmoid).FCLayer(4,1,activation.Sigmoid).Output(1,activat
 */
 
 func NewNetwork() Chain {
-	return Chain{Len: 0, Layers: new([]FCLayer)}
+	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f func(x []float64) []float64) Chain {
-	if c.Len == 0 {
-		L := new([]Neuron)
+func (c Chain) FCLayer(n int, next int, f func(x []float32) []float32) Chain {
+	L := make([]Neuron, n)
+	B := make([]float32, next)
+
+	if len(*c.Layers) == 0 {
 		for i := 0; i < n; i++ {
-			*L = append(*L, Neuron{Len: next, Input: 0, Bias: new([]float32), Cost: 0, Weights: new([]float32)})
+			W := make([]float32, next)
+			L[i] = Neuron{Cost: 0, Weights: &W}
 		}
-		// add a layer
-		*c.Layers = append(*c.Layers, FCLayer{Len: n, Neurons: L, Activation: f})
-		c.Len++
-		return c
-	}
-
-	if (*(*c.Layers)[c.Len-1].Neurons)[0].Len != n {
-		panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
-
-	}
-
-	L := new([]Neuron)
-	for i := 0; i < n; i++ {
-		*L = append(*L, Neuron{Len: next, Input: 0, Bias: new([]float32), Cost: 0, Weights: new([]float32)})
+	} else {
+		if len(*(*(*c.Layers)[len(*c.Layers)-1].Neurons)[0].Weights) != n {
+			panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
+		}
+		for i := 0; i < n; i++ {
+			W := make([]float32, next)
+			L[i] = Neuron{Cost: 0, Weights: &W}
+		}
 	}
 
 	// add a layer
-	*c.Layers = append(*c.Layers, FCLayer{Len: n, Neurons: L, Activation: f})
-	c.Len++
-	return c
-}
-
-func (c Chain) Output(n int, f func(x []float64) []float64) Chain {
-	if (*(*c.Layers)[c.Len-1].Neurons)[0].Len != n {
-		panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
-	}
-
-	// add a layer
-	c.Outputs = &Output{Len: n, Output: new([]float32)}
+	*c.Layers = append(*c.Layers, FCLayer{NextLen: next, Neurons: &L, Activation: f, Bias: &B})
 	return c
 }

@@ -2,36 +2,36 @@ package activation
 
 import "math"
 
-func Sigmoid(x []float64) []float64 {
+func Sigmoid(x []float32) []float32 {
 	for i := range x {
-		x[i] = 1 / (1 + math.Exp(-x[i]))
+		x[i] = 1 / (1 + float32(math.Exp(float64(-x[i]))))
 
 	}
 	return x
 }
 
-func SigmoidPrime(x []float64) []float64 {
+func SigmoidPrime(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
 	return x
 }
 
-func Tanh(x []float64) []float64 {
+func Tanh(x []float32) []float32 {
 	for i := range x {
-		x[i] = math.Tanh(x[i])
+		x[i] = float32(math.Tanh(float64(x[i])))
 	}
 	return x
 }
 
-func TanhPrime(x []float64) []float64 {
+func TanhPrime(x []float32) []float32 {
 	for i := range x {
 		x[i] = 1 - x[i]*x[i]
 	}
 	return x
 }
 
-func ReLU(x []float64) []float64 {
+func ReLU(x []float32) []float32 {
 	for i := range x {
 		if x[i] > 0 {
 			x[i] = x[i]
@@ -42,7 +42,7 @@ func ReLU(x []float64) []float64 {
 	return x
 }
 
-func ReLUPrime(x []float64) []float64 {
+func ReLUPrime(x []float32) []float32 {
 	for i := range x {
 		if x[i] > 0 {
 			x[i] = 1
@@ -53,33 +53,33 @@ func ReLUPrime(x []float64) []float64 {
 	return x
 }
 
-func Swish(x []float64) []float64 {
+func Swish(x []float32) []float32 {
 	for i := range x {
-		x[i] = x[i] / (1 + math.Exp(-x[i]))
+		x[i] = x[i] / (1 + float32(math.Exp(float64(-x[i]))))
 
 	}
 	return x
 }
-func SwishPrime(x []float64) []float64 {
+func SwishPrime(x []float32) []float32 {
 	for i := range x {
-		x[i] = x[i] + (1-x[i])/(1+math.Exp(-x[i]))
+		x[i] = x[i] + (1-x[i])/(1+float32(math.Exp(float64(-x[i]))))
 
 	}
 	return x
 }
 
-func Softmax(x []float64) []float64 {
-	sum := 0.0
+func Softmax(x []float32) []float32 {
+	var sum float32
 	for i := range x {
-		sum += math.Exp(x[i])
+		sum += float32(math.Exp(float64(x[i])))
 	}
 	for i := range x {
-		x[i] = math.Exp(x[i]) / sum
+		x[i] = float32(math.Exp(float64(x[i]))) / sum
 	}
 	return x
 }
 
-func SoftmaxPrime(x []float64) []float64 {
+func SoftmaxPrime(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
