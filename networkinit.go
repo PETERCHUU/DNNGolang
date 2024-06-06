@@ -1,6 +1,10 @@
 package nnfcgolang
 
-//intresting function for weight
+import (
+	"nnfcgolang/activation"
+)
+
+// intresting function for weight
 func BinaryCount(n int) int {
 	count := 0
 	for n > 0 {
@@ -10,7 +14,7 @@ func BinaryCount(n int) int {
 	return count
 }
 
-// targetfunction
+// target function
 /*
      input   hidden   output
 model 30 - 16 - 8 - 4 - 1
@@ -19,37 +23,30 @@ FCLayer(8,4,activation.Sigmoid).FCLayer(4,1,activation.Sigmoid).Output(activatio
 
 
 
-model.trainBy(backProp.adam)
-
-model.windowSize(int)
-
-model.train(data)
-
-model.test(testdata)
 
 model.saveAs("model.toml")
 */
 
+// Neuron is a struct of neuron,
 // float32 ready for CUDA
 type Neuron struct {
-	Cost    float32
-	Weights *[]float32 // len is number of next layer
+	Weights  *[]float32 // len is number of next layer
+	Gradient *[]float32 // same
 }
 
+// FCLayer is a struct of layer
 type FCLayer struct {
-	NextLen      int
-	Cost         float32
 	LearningRate float32
-	Gradient     float32
 	Bias         *[]float32 // len is number of next layer
 	Neurons      *[]Neuron  // len is number of this layer
 	Activation   func(x []float32) []float32
+	Prime        func(x []float32) []float32
 }
 
+// Chain is a struct of model
 type Chain struct {
-	Cost    float32
-	Layers  *[]FCLayer
-	Outputs func(x []float32) []float32
+	Cost   float32
+	Layers *[]FCLayer
 }
 
 //FCinit(30,16,activation.Sigmoid)
@@ -63,14 +60,15 @@ func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f func(x []float32) []float32) Chain {
+func (c Chain) FCLayer(n int, next int, f activation.Activation) Chain {
+	I, O := activation.ActivationFunc(f)
 	L := make([]Neuron, n)
 	B := make([]float32, next)
 
 	if len(*c.Layers) == 0 {
 		for i := 0; i < n; i++ {
 			W := make([]float32, next)
-			L[i] = Neuron{Cost: 0, Weights: &W}
+			L[i] = Neuron{Weights: &W}
 		}
 	} else {
 		if len(*(*(*c.Layers)[len(*c.Layers)-1].Neurons)[0].Weights) != n {
@@ -78,11 +76,11 @@ func (c Chain) FCLayer(n int, next int, f func(x []float32) []float32) Chain {
 		}
 		for i := 0; i < n; i++ {
 			W := make([]float32, next)
-			L[i] = Neuron{Cost: 0, Weights: &W}
+			L[i] = Neuron{Weights: &W}
 		}
 	}
 
 	// add a layer
-	*c.Layers = append(*c.Layers, FCLayer{NextLen: next, Neurons: &L, Activation: f, Bias: &B})
+	*c.Layers = append(*c.Layers, FCLayer{Neurons: &L, Activation: I, Prime: O, Bias: &B})
 	return c
 }

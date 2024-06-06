@@ -2,7 +2,34 @@ package activation
 
 import "math"
 
-func Sigmoid(x []float32) []float32 {
+type Activation int
+
+const (
+	Sigmoid Activation = iota
+	Tanh
+	ReLU
+	Swish
+	Softmax
+)
+
+func ActivationFunc(activation Activation) (func(x []float32) []float32, func(x []float32) []float32) {
+	switch activation {
+	case Sigmoid:
+		return SigmoidIn, SigmoidOut
+	case Tanh:
+		return TanhIn, TanhOut
+	case ReLU:
+		return ReLUIn, ReLUOut
+	case Swish:
+		return SwishIn, SwishOut
+	case Softmax:
+		return SoftmaxIn, SoftmaxOut
+	}
+	return nil, nil
+
+}
+
+func SigmoidIn(x []float32) []float32 {
 	for i := range x {
 		x[i] = 1 / (1 + float32(math.Exp(float64(-x[i]))))
 
@@ -10,28 +37,28 @@ func Sigmoid(x []float32) []float32 {
 	return x
 }
 
-func SigmoidPrime(x []float32) []float32 {
+func SigmoidOut(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
 	return x
 }
 
-func Tanh(x []float32) []float32 {
+func TanhIn(x []float32) []float32 {
 	for i := range x {
 		x[i] = float32(math.Tanh(float64(x[i])))
 	}
 	return x
 }
 
-func TanhPrime(x []float32) []float32 {
+func TanhOut(x []float32) []float32 {
 	for i := range x {
 		x[i] = 1 - x[i]*x[i]
 	}
 	return x
 }
 
-func ReLU(x []float32) []float32 {
+func ReLUIn(x []float32) []float32 {
 	for i := range x {
 		if x[i] > 0 {
 			x[i] = x[i]
@@ -42,7 +69,7 @@ func ReLU(x []float32) []float32 {
 	return x
 }
 
-func ReLUPrime(x []float32) []float32 {
+func ReLUOut(x []float32) []float32 {
 	for i := range x {
 		if x[i] > 0 {
 			x[i] = 1
@@ -53,14 +80,14 @@ func ReLUPrime(x []float32) []float32 {
 	return x
 }
 
-func Swish(x []float32) []float32 {
+func SwishIn(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] / (1 + float32(math.Exp(float64(-x[i]))))
 
 	}
 	return x
 }
-func SwishPrime(x []float32) []float32 {
+func SwishOut(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] + (1-x[i])/(1+float32(math.Exp(float64(-x[i]))))
 
@@ -68,7 +95,7 @@ func SwishPrime(x []float32) []float32 {
 	return x
 }
 
-func Softmax(x []float32) []float32 {
+func SoftmaxIn(x []float32) []float32 {
 	var sum float32
 	for i := range x {
 		sum += float32(math.Exp(float64(x[i])))
@@ -79,7 +106,7 @@ func Softmax(x []float32) []float32 {
 	return x
 }
 
-func SoftmaxPrime(x []float32) []float32 {
+func SoftmaxOut(x []float32) []float32 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
