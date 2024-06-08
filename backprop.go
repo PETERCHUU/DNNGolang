@@ -16,6 +16,25 @@ func cost(predict []float32, target []float32) []float32 {
 
 // gradient descent function
 
+//cal this neuron's gradient
+func (c *Chain) Gradient(inputs, targets [][]float32) []float32 {
+	// placeholder
+	if len(inputs) == 0 || len(targets) == 0 || len(inputs) != len(targets) {
+		return nil
+	}
+	var grad = make([]float32, 0)
+	for i, input := range inputs {
+		for j, inputn := range input {
+			grad[j] += Cost(inputn, targets[i][j])
+		}
+	}
+	return grad
+}
+
+func Cost(predict, target float32) float32 {
+	return float32(math.Abs(float64(predict - target)))
+}
+
 // SDG is a function for SDG optimizer
 // input is list of data, target is list of target
 // len of inputs and targets must be the same
