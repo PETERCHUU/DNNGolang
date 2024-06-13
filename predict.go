@@ -25,7 +25,7 @@ func (c Chain) predict(data []float32, index int) []float32 {
 		data[i] = (*n.Weights)[i] * thisData
 		i++
 		for i < len(*(*c.Layers)[index].Bias) {
-			data[i] *= (*n.Weights)[i] * thisData
+			data[i] += (*n.Weights)[i] * thisData
 			i++
 		}
 	}
@@ -38,4 +38,16 @@ func (c Chain) predict(data []float32, index int) []float32 {
 	// last output function
 
 	return data
+}
+
+func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
+	if len(data) != len(*(*c.Layers)[0].Neurons) {
+		return nil, errors.New("data length not match")
+	}
+	var PredictData [][]float32
+	PredictData = append(PredictData, data)
+	for i, _ := range *c.Layers {
+		PredictData = append(PredictData, c.predict(PredictData[i-1], i))
+	}
+	return PredictData, nil
 }

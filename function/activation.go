@@ -1,4 +1,4 @@
-package activation
+package function
 
 import "math"
 

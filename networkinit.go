@@ -1,7 +1,7 @@
 package nnfcgolang
 
 import (
-	"nnfcgolang/activation"
+	"nnfcgolang/function"
 )
 
 // intresting function for weight
@@ -26,6 +26,7 @@ FCLayer(8,4,activation.Sigmoid).FCLayer(4,1,activation.Sigmoid).Output(activatio
 
 model.saveAs("model.toml")
 */
+// input have next layer w and b
 
 // Neuron is a struct of neuron,
 // float32 ready for CUDA
@@ -45,7 +46,7 @@ type FCLayer struct {
 
 // Chain is a struct of model
 type Chain struct {
-	Cost   float32
+	Cost   func(predict, target float32) float32
 	Layers *[]FCLayer
 }
 
@@ -53,15 +54,18 @@ type Chain struct {
 
 /*
 model := nnfcgolang.NewNetwork().FCLayer(16,8,activation.Sigmoid).
-FCLayer(8,4,activation.Sigmoid).FCLayer(4,1,activation.Sigmoid).Output(1,activation.softmax)
+FCLayer(8,4,activation.Sigmoid).FCLayer(4,1,activation.softmax)
+
+the len(model):=[16,8,4]
+
 */
 
 func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f activation.Activation) Chain {
-	I, O := activation.ActivationFunc(f)
+func (c Chain) FCLayer(n int, next int, f function.Activation) Chain {
+	I, O := function.ActivationFunc(f)
 	L := make([]Neuron, n)
 	B := make([]float32, next)
 
