@@ -44,9 +44,10 @@ func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
 	if len(data) != len(*(*c.Layers)[0].Neurons) {
 		return nil, errors.New("data length not match")
 	}
+
 	var PredictData [][]float32
 	PredictData = append(PredictData, data)
-	for i, _ := range *c.Layers {
+	for i := 1; i < len(*c.Layers); i++ {
 		PredictData = append(PredictData, c.predict(PredictData[i-1], i))
 	}
 	return PredictData, nil
