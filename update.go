@@ -54,7 +54,8 @@ def backprop(self, x, y):
             return (nabla_b, nabla_w)
 */
 
-func (c *Chain) BackProp(input, target []float32) {
+// one target at a time
+func (c *Chain) BackProp(input, target []float32, learningRate float32) {
 	// get every act in every layer
 	PredictLayers, err := c.PredictLayer(input)
 	if err != nil {
@@ -86,10 +87,10 @@ func (c *Chain) BackProp(input, target []float32) {
 
 			//change bias number by delta
 			target[j] = target[j] * PredictLayers[i+1][j]
-			(*(*c.Layers)[i+1].Bias)[j] = target[j]
+			(*(*c.Layers)[i+1].Bias)[j] = target[j] * learningRate
 
 			for k, _ := range PredictLayers[i] {
-				(*(*(*c.Layers)[i+1].Neurons)[j].Weights)[k] = target[j] * PredictLayers[i][k]
+				(*(*(*c.Layers)[i+1].Neurons)[j].Weights)[k] = target[j] * PredictLayers[i][k] * learningRate
 			}
 		}
 
