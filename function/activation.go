@@ -1,6 +1,9 @@
 package function
 
-import "math"
+import (
+	"math"
+	"reflect"
+)
 
 type Activation int
 
@@ -11,6 +14,26 @@ const (
 	Swish
 	Softmax
 )
+
+func GetEnum(function func(x []float32) []float32) int32 {
+	if reflect.DeepEqual(function, SigmoidIn) {
+		return 0
+	}
+	if reflect.DeepEqual(function, TanhIn) {
+		return 1
+	}
+	if reflect.DeepEqual(function, ReLUIn) {
+		return 2
+	}
+	if reflect.DeepEqual(function, SwishIn) {
+		return 3
+	}
+	if reflect.DeepEqual(function, SoftmaxIn) {
+		return 4
+	}
+	return -1
+
+}
 
 func ActivationFunc(activation Activation) (func(x []float32) []float32, func(x []float32) []float32) {
 	switch activation {

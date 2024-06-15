@@ -50,5 +50,6 @@ func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
 	for i := 1; i < len(*c.Layers); i++ {
 		PredictData = append(PredictData, c.predict(PredictData[i-1], i))
 	}
+
 	return PredictData, nil
 }

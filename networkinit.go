@@ -31,8 +31,7 @@ model.saveAs("model.toml")
 // Neuron is a struct of neuron,
 // float32 ready for CUDA
 type Neuron struct {
-	Weights  *[]float32 // len is number of next layer
-	Gradient *[]float32 // same
+	Weights *[]float32 // len is number of next layer
 }
 
 // FCLayer is a struct of layer
@@ -40,6 +39,7 @@ type FCLayer struct {
 	LearningRate float32
 	Bias         *[]float32 // len is number of next layer
 	Neurons      *[]Neuron  // len is number of this layer
+	ActivateEnum function.Activation
 	Activation   func(x []float32) []float32
 	Prime        func(x []float32) []float32
 }
@@ -48,6 +48,7 @@ type FCLayer struct {
 type Chain struct {
 	Cost   func(predict, target float32) float32
 	Layers *[]FCLayer
+	Cache  *[]FCLayer
 }
 
 //FCinit(30,16,activation.Sigmoid)
@@ -85,6 +86,6 @@ func (c Chain) FCLayer(n int, next int, f function.Activation) Chain {
 	}
 
 	// add a layer
-	*c.Layers = append(*c.Layers, FCLayer{Neurons: &L, Activation: I, Prime: O, Bias: &B})
+	*c.Layers = append(*c.Layers, FCLayer{Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f})
 	return c
 }

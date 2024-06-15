@@ -2,7 +2,6 @@ package Sample
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io"
 	"os"
 )
@@ -30,7 +29,7 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 		if i == 1 {
 			length = b
 		}
-		fmt.Printf("Byte value: %d\n", b)
+		//fmt.Printf("Byte value: %d\n", b)
 
 	}
 	for i := 0; i < 2; i++ {
@@ -39,7 +38,7 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Byte value: %d\n", b)
+		//fmt.Printf("Byte value: %d\n", b)
 
 	}
 	var ImageBuffer = make([]uint8, 784)

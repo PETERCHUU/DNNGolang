@@ -12,6 +12,9 @@ const (
 	trainingLabelPath = "Sample/train/train-labels.idx1-ubyte"
 	testDataPath      = "Sample/train/t10k-images.idx3-ubyte"
 	testLabelPath     = "Sample/train/t10k-labels.idx1-ubyte"
+
+	sampleRate   = 1000
+	learningRate = 0.7
 )
 
 func main() {
@@ -22,15 +25,28 @@ func main() {
 
 	fmt.Printf("Accurate before train: %.2f\n", calculateAccurate(&module, tester))
 
-	for i, v := range sample {
-		module.Train(v.Image[:], v.Label[:], 0.01)
+	// for i, v := range sample {
+	// 	module.BackProp(v.Image[:], v.Label[:], learningRate)
+	// 	//fmt.Printf("before weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
+	// 	if i%1000 == 0 {
+	// 		fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
+	// 	}
 
-		if i%1000 == 0 {
-			fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
+	// }
+
+	for i := 0; i < len(sample); i += 1000 {
+		sampleInput := make([][]float32, 1000)
+		sampleTarget := make([][]float32, 1000)
+		for j := 0; j < 1000; j++ {
+			sampleInput[j] = sample[i+j].Image[:]
+			sampleTarget[j] = sample[i+j].Label[:]
 		}
 
+		module.UpdateMiniBatch(sampleInput, sampleTarget, sampleRate, learningRate)
+		fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
 	}
 
+	//fmt.Printf("after weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
 	fmt.Printf("Accurate after train: %.2f\n", calculateAccurate(&module, tester))
 }
 
@@ -42,7 +58,6 @@ func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) flo
 			panic(err)
 		}
 		accurate += nnfcgolang.Accurate(predict, v.Label[:])
-
 	}
 	accurate /= float32(len(sample))
 	return accurate
