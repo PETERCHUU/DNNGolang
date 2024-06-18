@@ -2,16 +2,11 @@ package nnfcgolang
 
 import "errors"
 
-// target function
-/*
-	output,err:=network.Predict(data)
-*/
-// one data at a time
 func (c Chain) Predict(data []float32) ([]float32, error) {
 	if len(data) != len(*(*c.Layers)[0].Neurons) {
 		return nil, errors.New("data length not match")
 	}
-	for i, _ := range *c.Layers {
+	for i := range *c.Layers {
 		data = c.predict(data, i)
 	}
 	return data, nil

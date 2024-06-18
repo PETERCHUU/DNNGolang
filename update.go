@@ -18,7 +18,7 @@ func (c *Chain) BackProp(input, target []float32, learningRate float32) ([][]flo
 	}
 
 	// change target to be cost from last layer
-	for i, _ := range target {
+	for i := range target {
 		target[i] = Cost(PredictLayers[len(PredictLayers)-1][i], target[i]) * 2
 	}
 
@@ -28,7 +28,7 @@ func (c *Chain) BackProp(input, target []float32, learningRate float32) ([][]flo
 		if len(target) != len(PredictLayers[i+1]) {
 			println("Data len Error")
 		}
-		for j, _ := range PredictLayers[i+1] {
+		for j := range PredictLayers[i+1] {
 			PredictLayers[i+1][j] = PredictLayers[i+1][j] * target[j]
 		}
 
@@ -38,11 +38,11 @@ func (c *Chain) BackProp(input, target []float32, learningRate float32) ([][]flo
 		PredictLayers[i+1] = (*c.Layers)[i+1].Prime(PredictLayers[i+1])
 		//fmt.Printf("weight: %.3f , \n", (*(*c.Layers)[i+1].Neurons)[0].Weights)
 
-		for j, _ := range PredictLayers[i+1] {
+		for j := range PredictLayers[i+1] {
 			//change bias number by delta
 			target[j] = target[j] * PredictLayers[i+1][j]
 			(*(*c.Layers)[i+1].Bias)[j] += target[j] * learningRate
-			for k, _ := range PredictLayers[i] {
+			for k := range PredictLayers[i] {
 				(*(*(*c.Layers)[i+1].Neurons)[k].Weights)[j] += target[j] * PredictLayers[i][k] * learningRate
 			}
 		}
@@ -51,9 +51,9 @@ func (c *Chain) BackProp(input, target []float32, learningRate float32) ([][]flo
 		target = make([]float32, len(PredictLayers[i]))
 
 		// next layer a loop
-		for j, _ := range PredictLayers[i] {
+		for j := range PredictLayers[i] {
 			target[j] = 0
-			for k, _ := range PredictLayers[i+1] {
+			for k := range PredictLayers[i+1] {
 				target[j] += cost[k] * (*(*(*c.Layers)[i+1].Neurons)[j].Weights)[k] * PredictLayers[i+1][k]
 			}
 		}
@@ -68,7 +68,7 @@ func (c *Chain) Train(input, target []float32, learningRate float32) {
 
 func Accurate(predict, target []float32) float32 {
 	var sum float32
-	for i, _ := range predict {
+	for i := range predict {
 		sum += 1 - Cost(predict[i], target[i])
 	}
 	return sum / float32(len(predict))
@@ -84,26 +84,26 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float32, sam
 	}
 	nablaB := make([][]float32, len(*c.Layers))
 	nablaW := make([][][]float32, len(*c.Layers))
-	for i, _ := range *c.Layers {
+	for i := range *c.Layers {
 		nablaB[i] = make([]float32, len(*(*c.Layers)[i].Bias))
 		nablaW[i] = make([][]float32, len((*(*c.Layers)[i].Neurons)))
-		for j, _ := range nablaW[i] {
+		for j := range nablaW[i] {
 			nablaW[i][j] = make([]float32, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 		}
 	}
 	for i := 0; i < len(miniBatchTarget); i++ {
-		deltaNablaB, deltaNablaW, err := c.MiniBatchBackProp(miniBatchInput[i], miniBatchTarget[i], LearningRate)
+		deltaNablaB, deltaNablaW, err := c.MiniBatchBackProp(miniBatchInput[i], miniBatchTarget[i])
 		if err != nil {
 			println(err.Error())
 		}
-		for k, _ := range *c.Layers {
-			for j, _ := range nablaB[k] {
-				for h, _ := range nablaW[k][j] {
+		for k := range *c.Layers {
+			for j := range nablaB[k] {
+				for h := range nablaW[k][j] {
 					nablaB[k][j] += deltaNablaB[k][j][h]
 				}
 			}
-			for j, _ := range nablaW[k] {
-				for h, _ := range nablaW[k][j] {
+			for j := range nablaW[k] {
+				for h := range nablaW[k][j] {
 					nablaW[k][j][h] += deltaNablaW[k][j][h]
 				}
 			}
@@ -111,12 +111,12 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float32, sam
 
 	}
 
-	for i, _ := range *c.Layers {
-		for j, _ := range *(*c.Layers)[i].Bias {
+	for i := range *c.Layers {
+		for j := range *(*c.Layers)[i].Bias {
 			(*(*c.Layers)[i].Bias)[j] += LearningRate / float32(len(miniBatchInput)) * nablaB[i][j]
 		}
-		for j, _ := range *(*c.Layers)[i].Neurons {
-			for k, _ := range *(*(*c.Layers)[i].Neurons)[j].Weights {
+		for j := range *(*c.Layers)[i].Neurons {
+			for k := range *(*(*c.Layers)[i].Neurons)[j].Weights {
 				(*(*(*c.Layers)[i].Neurons)[j].Weights)[k] += LearningRate / float32(len(miniBatchInput)) * nablaW[i][j][k]
 			}
 		}
@@ -124,13 +124,13 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float32, sam
 	return nil
 }
 
-func (c *Chain) MiniBatchBackProp(input, target []float32, learningRate float32) ([][][]float32, [][][]float32, error) {
+func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][]float32, error) {
 	w := make([][][]float32, len(*c.Layers))
 	b := make([][][]float32, len(*c.Layers))
-	for i, _ := range *c.Layers {
+	for i := range *c.Layers {
 		w[i] = make([][]float32, len(*(*c.Layers)[i].Neurons))
 		b[i] = make([][]float32, len(*(*c.Layers)[i].Neurons))
-		for j, _ := range *(*c.Layers)[i].Neurons {
+		for j := range *(*c.Layers)[i].Neurons {
 			w[i][j] = make([]float32, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 			b[i][j] = make([]float32, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 		}
@@ -144,7 +144,7 @@ func (c *Chain) MiniBatchBackProp(input, target []float32, learningRate float32)
 	}
 
 	// change target to be cost from last layer
-	for i, _ := range target {
+	for i := range target {
 		target[i] = Cost(PredictLayers[len(PredictLayers)-1][i], target[i]) * 2
 	}
 
@@ -154,7 +154,7 @@ func (c *Chain) MiniBatchBackProp(input, target []float32, learningRate float32)
 		if len(target) != len(PredictLayers[i+1]) {
 			println("Data len Error")
 		}
-		for j, _ := range PredictLayers[i+1] {
+		for j := range PredictLayers[i+1] {
 			PredictLayers[i+1][j] = PredictLayers[i+1][j] * target[j]
 		}
 
@@ -164,13 +164,13 @@ func (c *Chain) MiniBatchBackProp(input, target []float32, learningRate float32)
 		PredictLayers[i+1] = (*c.Layers)[i+1].Prime(PredictLayers[i+1])
 		//fmt.Printf("weight: %.3f , \n", (*(*c.Layers)[i+1].Neurons)[0].Weights)
 
-		for j, _ := range PredictLayers[i+1] {
+		for j := range PredictLayers[i+1] {
 			//change bias number by delta
 			target[j] = target[j] * PredictLayers[i+1][j]
 
-			for k, _ := range PredictLayers[i] {
-				w[i+1][k][j] += target[j] * PredictLayers[i][k] * learningRate
-				b[i+1][k][j] += target[j] * learningRate
+			for k := range PredictLayers[i] {
+				w[i+1][k][j] += target[j] * PredictLayers[i][k]
+				b[i+1][k][j] += target[j]
 			}
 		}
 		//fmt.Printf("weight: %.3f\n", (*(*c.Layers)[1].Neurons)[0].Weights)
@@ -178,9 +178,9 @@ func (c *Chain) MiniBatchBackProp(input, target []float32, learningRate float32)
 		target = make([]float32, len(PredictLayers[i]))
 
 		// next layer a loop
-		for j, _ := range PredictLayers[i] {
+		for j := range PredictLayers[i] {
 			target[j] = 0
-			for k, _ := range PredictLayers[i+1] {
+			for k := range PredictLayers[i+1] {
 				target[j] += cost[k] * w[i+1][j][k] * PredictLayers[i+1][k]
 			}
 		}

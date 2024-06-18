@@ -39,7 +39,11 @@ func (c *Chain) Save() error {
 	// Layer Info
 	c.writeLayerInfo(file)
 
+	// Bias Info
+	c.writeBiasInfo(file)
+
 	// Weight Info
+	c.writeWeightInfo(file)
 
 	return nil
 
