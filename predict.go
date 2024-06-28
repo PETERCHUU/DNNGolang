@@ -7,13 +7,16 @@ func (c Chain) Predict(data []float32) ([]float32, error) {
 		return nil, errors.New("data length not match")
 	}
 	for i := range *c.Layers {
-		data = c.predict(data, i)
+		switch *&(*c.Layers)[i].NNtype {
+		case FC:
+			data = c.FCpredict(data, i)
+		}
+
 	}
 	return data, nil
 }
 
-func (c Chain) predict(data []float32, index int) []float32 {
-
+func (c Chain) FCpredict(data []float32, index int) []float32 {
 	for _, n := range *(*c.Layers)[index].Neurons {
 		i := 0
 		thisData := data[i]
@@ -27,12 +30,10 @@ func (c Chain) predict(data []float32, index int) []float32 {
 	for i, b := range *(*c.Layers)[index].Bias {
 		data[i] += b
 	}
-	data = (*c.Layers)[index].Activation(data[:len(*(*c.Layers)[index].Bias)])
-	//print(len(data), "\n")
 
 	// last output function
 
-	return data
+	return (*c.Layers)[index].Activation(data[:len(*(*c.Layers)[index].Bias)])
 }
 
 func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
@@ -43,8 +44,10 @@ func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
 	var PredictData [][]float32
 	PredictData = append(PredictData, data)
 	for i := 1; i < len(*c.Layers); i++ {
-		PredictData = append(PredictData, c.predict(PredictData[i-1], i))
+		PredictData = append(PredictData, c.FCpredict(PredictData[i-1], i))
 	}
 
 	return PredictData, nil
 }
+
+

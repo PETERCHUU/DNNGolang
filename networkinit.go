@@ -4,6 +4,13 @@ import (
 	"nnfcgolang/function"
 )
 
+type NNType int
+
+const (
+	FC NNType = iota
+	RNN
+)
+
 // intresting function for weight
 func BinaryCount(n int) int {
 	count := 0
@@ -36,6 +43,7 @@ type Neuron struct {
 
 // FCLayer is a struct of layer
 type FCLayer struct {
+	NNtype       NNType
 	LearningRate float32
 	Bias         *[]float32 // len is number of next layer
 	Neurons      *[]Neuron  // len is number of this layer
@@ -49,6 +57,7 @@ type Chain struct {
 	Cost   func(predict, target float32) float32
 	Layers *[]FCLayer
 	Cache  *[]FCLayer
+	input  *[][]float32
 }
 
 //FCinit(30,16,activation.Sigmoid)
@@ -88,4 +97,18 @@ func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Cha
 	// add a layer
 	*c.Layers = append(*c.Layers, FCLayer{LearningRate: rate, Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f})
 	return c
+}
+
+func (c Chain) SetType(t NNType) Chain {
+	(*c.Layers)[len(*c.Layers)-1].NNtype = t
+	return c
+}
+
+// RNN
+/*
+	model := nnfcgolang.NewNetwork().RNN(7,32,169,activation.Sigmoid,activation.Softmax)
+*/
+
+func (c Chain) RNN(n int, outputNLayer int, f function.Activation, rate float32) Chain {
+	return c.FCLayer(n+outputNLayer, outputNLayer, f, rate).SetType(RNN)
 }

@@ -40,6 +40,12 @@ func BenchmarkNewNetwork(T *testing.B) {
 	//newwork.saveAs("model.toml")
 }
 
+func TestFCLayer(t *testing.T) {
+	nn := nnfcgolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate)
+	println(len(*nn.Layers))
+	t.Log("haha")
+}
+
 func TestPredict(t *testing.T) {
 	FCnetwork := nnfcgolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
