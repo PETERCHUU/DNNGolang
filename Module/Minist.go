@@ -18,8 +18,8 @@ const (
 )
 
 func main() {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.ReLU).FCLayer(49, 23, function.ReLU).
-		FCLayer(23, 10, function.Softmax)
+	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.ReLU, learningRate).FCLayer(49, 23, function.ReLU, learningRate).
+		FCLayer(23, 10, function.Softmax, learningRate)
 	sample := Sample.InitSample(trainingDataPath, trainingLabelPath)
 	tester := Sample.InitSample(testDataPath, testLabelPath)
 
@@ -31,9 +31,9 @@ func main() {
 	// 	if i%1000 == 0 {
 	// 		fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
 	// 	}
-
 	// }
 
+	
 	for i := 0; i < len(sample); i += 1000 {
 		sampleInput := make([][]float32, 1000)
 		sampleTarget := make([][]float32, 1000)

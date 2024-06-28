@@ -57,7 +57,7 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 			panic(err)
 		}
 		label := [10]float32{}
-		switch LabelBuffer {
+		switch LabelBuffer % 10 {
 		case 0:
 			label[0] = 1
 		case 1:

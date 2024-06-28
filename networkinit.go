@@ -65,7 +65,7 @@ func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f function.Activation) Chain {
+func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Chain {
 	I, O := function.ActivationFunc(f)
 	L := make([]Neuron, n)
 	B := make([]float32, next)
@@ -86,6 +86,6 @@ func (c Chain) FCLayer(n int, next int, f function.Activation) Chain {
 	}
 
 	// add a layer
-	*c.Layers = append(*c.Layers, FCLayer{Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f})
+	*c.Layers = append(*c.Layers, FCLayer{LearningRate: rate, Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f})
 	return c
 }
