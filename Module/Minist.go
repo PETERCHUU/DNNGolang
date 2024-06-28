@@ -33,7 +33,6 @@ func main() {
 	// 	}
 	// }
 
-	
 	for i := 0; i < len(sample); i += 1000 {
 		sampleInput := make([][]float32, 1000)
 		sampleTarget := make([][]float32, 1000)
@@ -53,10 +52,7 @@ func main() {
 func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) float32 {
 	var accurate float32
 	for _, v := range sample {
-		predict, err := module.Predict(v.Image[:])
-		if err != nil {
-			panic(err)
-		}
+		predict := module.Predict(v.Image[:])
 		accurate += nnfcgolang.Accurate(predict, v.Label[:])
 	}
 	accurate /= float32(len(sample))

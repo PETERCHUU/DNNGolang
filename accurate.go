@@ -6,10 +6,8 @@ func (c Chain) calculateAccurate(inputs, targets [][]float32) float32 {
 		panic("dataFormate error, input len != target len")
 	}
 	for i := range inputs {
-		predict, err := c.Predict(inputs[i])
-		if err != nil {
-			panic(err)
-		}
+		predict := c.Predict(inputs[i])
+
 		accurate += Accurate(predict, targets[i])
 	}
 	accurate /= float32(len(inputs))

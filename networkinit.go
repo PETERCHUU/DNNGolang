@@ -99,8 +99,8 @@ func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Cha
 	return c
 }
 
-func (c Chain) SetType(t NNType) Chain {
-	(*c.Layers)[len(*c.Layers)-1].NNtype = t
+func (c Chain) RNN() Chain {
+	(*c.Layers)[len(*c.Layers)-1].NNtype = RNN
 	return c
 }
 
@@ -108,7 +108,3 @@ func (c Chain) SetType(t NNType) Chain {
 /*
 	model := nnfcgolang.NewNetwork().RNN(7,32,169,activation.Sigmoid,activation.Softmax)
 */
-
-func (c Chain) RNN(n int, outputNLayer int, f function.Activation, rate float32) Chain {
-	return c.FCLayer(n+outputNLayer, outputNLayer, f, rate).SetType(RNN)
-}
