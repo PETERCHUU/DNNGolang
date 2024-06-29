@@ -135,25 +135,28 @@ func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][
 			b[i][j] = make([]float32, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 		}
 	}
+
+	// layer input- hidden - output
 	PredictLayers, err := c.PredictLayer(input)
 	if err != nil {
 		return nil, nil, err
 	}
-	if len(PredictLayers) != len(*c.Layers) {
+	if len(PredictLayers) != len(*c.Layers)+1 {
 		return nil, nil, errors.New("dataFormate error, prediction data len != layer number")
 	}
 
 	// change target to be cost from last layer
 	for i := range target {
-		target[i] = Cost(PredictLayers[len(PredictLayers)-1][i], target[i]) * 2
+		target[i] = Cost(PredictLayers[len(*c.Layers)][i], target[i]) * 2
 	}
 
 	// layer loop from last hidden layer
-	// 23 - 49 - 784
+	//  23 - 49 - 784
 	for i := len(PredictLayers) - 2; i > 0; i-- {
 		if len(target) != len(PredictLayers[i+1]) {
 			println("Data len Error")
 		}
+
 		for j := range PredictLayers[i+1] {
 			PredictLayers[i+1][j] = PredictLayers[i+1][j] * target[j]
 		}
@@ -161,10 +164,11 @@ func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][
 		cost := target
 
 		// loop activation
-		PredictLayers[i+1] = (*c.Layers)[i+1].Prime(PredictLayers[i+1])
+		PredictLayers[i+1] = (*c.Layers)[i].Prime(PredictLayers[i+1])
 		//fmt.Printf("weight: %.3f , \n", (*(*c.Layers)[i+1].Neurons)[0].Weights)
 
 		for j := range PredictLayers[i+1] {
+
 			//change bias number by delta
 			target[j] = target[j] * PredictLayers[i+1][j]
 

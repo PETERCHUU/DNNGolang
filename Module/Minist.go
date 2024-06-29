@@ -18,7 +18,7 @@ const (
 )
 
 func main() {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.ReLU, learningRate).FCLayer(49, 23, function.ReLU, learningRate).
+	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).FCLayer(49, 23, function.Sigmoid, learningRate).
 		FCLayer(23, 10, function.Softmax, learningRate)
 	sample := Sample.InitSample(trainingDataPath, trainingLabelPath)
 	tester := Sample.InitSample(testDataPath, testLabelPath)

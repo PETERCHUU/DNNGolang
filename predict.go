@@ -52,8 +52,8 @@ func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
 
 	var PredictData [][]float32
 	PredictData = append(PredictData, data)
-	for i := 1; i < len(*c.Layers); i++ {
-		PredictData = append(PredictData, c.FCpredict(PredictData[i-1], i))
+	for i := 0; i < len(*c.Layers); i++ {
+		PredictData = append(PredictData, c.FCpredict(PredictData[i], i))
 	}
 
 	return PredictData, nil
