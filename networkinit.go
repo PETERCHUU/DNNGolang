@@ -85,6 +85,9 @@ func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Cha
 			L[i] = Neuron{Weights: &W}
 		}
 	} else {
+		if (*c.Layers)[len(*c.Layers)-1].NNtype == RNN {
+			panic("RNN must be the last layer")
+		}
 		if len(*(*(*c.Layers)[len(*c.Layers)-1].Neurons)[0].Weights) != n {
 			panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
 		}

@@ -8,8 +8,8 @@ var (
 
 /* predict rnn : return [fc, rnn]
 
-append input with 
- */
+append input with
+*/
 
 func (c Chain) Predict(data []float32) []float32 {
 	if len(data) == 0 {
@@ -17,15 +17,7 @@ func (c Chain) Predict(data []float32) []float32 {
 	}
 
 	for i := range *c.Layers {
-		switch *&(*c.Layers)[i].NNtype {
-		case FC:
-			data = c.FCpredict(data, i)
-		case RNN:
-			if i != len(*c.Layers)-1 {
-				panic("RNN must be the last layer")
-			}
-			return c.FCpredict(data, i)
-		}
+		data = c.FCpredict(data, i)
 	}
 
 	return data
