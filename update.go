@@ -125,6 +125,7 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float32, sam
 }
 
 func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][]float32, error) {
+
 	w := make([][][]float32, len(*c.Layers))
 	b := make([][][]float32, len(*c.Layers))
 	for i := range *c.Layers {
@@ -145,11 +146,6 @@ func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][
 		return nil, nil, errors.New("dataFormate error, prediction data len != layer number")
 	}
 
-	// change target to be cost from last layer
-	for i := range target {
-		target[i] = Cost(PredictLayers[len(*c.Layers)][i], target[i]) * 2
-	}
-
 	// layer loop from last hidden layer
 	//  23 - 49 - 784
 	for i := len(PredictLayers) - 2; i > 0; i-- {
@@ -157,26 +153,23 @@ func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][
 			println("Data len Error")
 		}
 
+		// count delta
+		PredictLayers[i+1] = (*c.Layers)[i].Prime(PredictLayers[i+1])
+		//target = (*c.Layers)[i].Prime(target)
 		for j := range PredictLayers[i+1] {
-			PredictLayers[i+1][j] = PredictLayers[i+1][j] * target[j]
+			PredictLayers[i+1][j] = (PredictLayers[i+1][j] - target[j]) * 2
 		}
-
-		cost := target
 
 		// loop activation
-		PredictLayers[i+1] = (*c.Layers)[i].Prime(PredictLayers[i+1])
-		//fmt.Printf("weight: %.3f , \n", (*(*c.Layers)[i+1].Neurons)[0].Weights)
 
+		//update bias and weight
 		for j := range PredictLayers[i+1] {
-
-			//change bias number by delta
-			target[j] = target[j] * PredictLayers[i+1][j]
-
 			for k := range PredictLayers[i] {
-				w[i+1][k][j] += target[j] * PredictLayers[i][k]
-				b[i+1][k][j] += target[j]
+				w[i][k][j] += PredictLayers[i+1][j] * PredictLayers[i][k]
+				b[i][k][j] += PredictLayers[i+1][j]
 			}
 		}
+
 		//fmt.Printf("weight: %.3f\n", (*(*c.Layers)[1].Neurons)[0].Weights)
 
 		target = make([]float32, len(PredictLayers[i]))
@@ -185,7 +178,7 @@ func (c *Chain) MiniBatchBackProp(input, target []float32) ([][][]float32, [][][
 		for j := range PredictLayers[i] {
 			target[j] = 0
 			for k := range PredictLayers[i+1] {
-				target[j] += cost[k] * w[i+1][j][k] * PredictLayers[i+1][k]
+				target[j] += target[k] * (*(*(*c.Layers)[i].Neurons)[j].Weights)[k] * PredictLayers[i+1][k]
 			}
 		}
 	}

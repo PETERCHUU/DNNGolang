@@ -14,7 +14,7 @@ const (
 	testLabelPath     = "Sample/train/t10k-labels.idx1-ubyte"
 
 	sampleRate   = 1000
-	learningRate = 0.7
+	learningRate = 0.02
 )
 
 func main() {
@@ -42,11 +42,11 @@ func main() {
 		}
 
 		module.UpdateMiniBatch(sampleInput, sampleTarget, sampleRate, learningRate)
-		fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
+		fmt.Printf("Accurate after %d train: %.4f\n", i, calculateAccurate(&module, tester))
 	}
 
 	//fmt.Printf("after weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
-	fmt.Printf("Accurate after train: %.2f\n", calculateAccurate(&module, tester))
+	fmt.Printf("Accurate after train: %.4f\n", calculateAccurate(&module, tester))
 }
 
 func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) float32 {
