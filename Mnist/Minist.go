@@ -1,9 +1,9 @@
-package main
+package Mnist
 
 import (
 	"fmt"
 	"nnfcgolang"
-	"nnfcgolang/Sample"
+	"nnfcgolang/Mnist/FileReader"
 	"nnfcgolang/function"
 )
 
@@ -14,14 +14,16 @@ const (
 	testLabelPath     = "Sample/train/t10k-labels.idx1-ubyte"
 
 	sampleRate   = 1000
-	learningRate = 0.03
+	learningRate = 0.15
 )
 
-func main() {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.ReLU, learningRate).FCLayer(49, 23, function.ReLU, learningRate).
+func Run() {
+	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).FCLayer(49, 23, function.Sigmoid, learningRate).
 		FCLayer(23, 10, function.Softmax, learningRate)
-	sample := Sample.InitSample(trainingDataPath, trainingLabelPath)
-	tester := Sample.InitSample(testDataPath, testLabelPath)
+	//betterModule := module
+	var accurate float64
+	sample := FileReader.InitSample(trainingDataPath, trainingLabelPath)
+	tester := FileReader.InitSample(testDataPath, testLabelPath)
 
 	fmt.Printf("Accurate before train: %.2f\n", calculateAccurate(&module, tester))
 
@@ -42,14 +44,19 @@ func main() {
 		}
 
 		module.UpdateMiniBatch(sampleInput, sampleTarget, sampleRate, learningRate)
-		fmt.Printf("Accurate after %d train: %.4f\n", i, calculateAccurate(&module, tester))
+		thisAccurate := calculateAccurate(&module, tester)
+		if thisAccurate > accurate {
+			accurate = thisAccurate
+			//betterModule = module
+		}
+		fmt.Printf("Accurate after %d train: %.4f\n", i, accurate)
 	}
 
 	//fmt.Printf("after weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
 	fmt.Printf("Accurate after train: %.4f\n", calculateAccurate(&module, tester))
 }
 
-func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) float64 {
+func calculateAccurate(module *nnfcgolang.Chain, sample []FileReader.MnstSample) float64 {
 	var accurate float64
 	for _, v := range sample {
 		predict := module.Predict(v.Image[:])
@@ -57,5 +64,8 @@ func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) flo
 	}
 
 	accurate /= float64(len(sample))
+	if accurate > 1 {
+		accurate -= 1
+	}
 	return accurate
 }

@@ -1,4 +1,4 @@
-package Sample
+package FileReader
 
 import (
 	"encoding/binary"

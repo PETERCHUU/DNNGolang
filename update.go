@@ -69,13 +69,13 @@ func (c *Chain) Train(input, target []float64, learningRate float64) {
 func Accurate(predict, target []float64) float64 {
 	var sum float64
 	for i := range predict {
-		sum += 1 - Cost(predict[i], target[i])
+		sum += math.Abs(Cost(predict[i], target[i]))
 	}
 	return sum / float64(len(predict))
 }
 
 func Cost(predict, target float64) float64 {
-	return math.Abs(predict - target)
+	return target - predict
 }
 
 func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sampleRate int, LearningRate float64) error {
@@ -91,12 +91,6 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 			nablaW[i][j] = make([]float64, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 		}
 	}
-	totalWeight := make([][]float64, len(*c.Layers))
-	for i := range *c.Layers {
-		totalWeight[i] = make([]float64, len(*(*c.Layers)[i].Neurons))
-	}
-	totalBias := make([]float64, len(*c.Layers))
-
 	for i := 0; i < len(miniBatchTarget); i++ {
 		deltaNablaB, deltaNablaW, err := c.MiniBatchBackProp(miniBatchInput[i], miniBatchTarget[i])
 		if err != nil {
@@ -109,19 +103,12 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 			for j := range nablaB[k] {
 				for h := range nablaW[k][j] {
 					nablaB[k][j] += deltaNablaB[k][j][h]
-					totalBias[k] += deltaNablaB[k][j][h]
 				}
 			}
 			for j := range nablaW[k] {
 				for h := range nablaW[k][j] {
 					nablaW[k][j][h] += deltaNablaW[k][j][h]
-					totalWeight[k][j] += deltaNablaW[k][j][h]
-					if math.IsNaN(float64(totalWeight[k][j])) {
-						totalWeight[k][j] = 0
-					}
-					if math.IsNaN(float64(nablaW[k][j][h])) {
-						nablaW[k][j][h] = 0
-					}
+
 				}
 			}
 		}
@@ -130,11 +117,11 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 
 	for i := range *c.Layers {
 		for j := range *(*c.Layers)[i].Bias {
-			(*(*c.Layers)[i].Bias)[j] += (LearningRate / float64(len(miniBatchInput)) * nablaB[i][j]) - (totalBias[i] / float64(len(miniBatchInput)))
+			(*(*c.Layers)[i].Bias)[j] += (LearningRate / float64(len(miniBatchInput)) * nablaB[i][j])
 		}
 		for j := range *(*c.Layers)[i].Neurons {
 			for k := range *(*(*c.Layers)[i].Neurons)[j].Weights {
-				(*(*(*c.Layers)[i].Neurons)[j].Weights)[k] += (LearningRate / float64(len(miniBatchInput)) * nablaW[i][j][k]) - (totalWeight[i][j] / float64(len(miniBatchInput)))
+				(*(*(*c.Layers)[i].Neurons)[j].Weights)[k] += (LearningRate / float64(len(miniBatchInput)) * nablaW[i][j][k])
 			}
 
 		}
@@ -173,7 +160,7 @@ func (c *Chain) MiniBatchBackProp(input, target []float64) ([][][]float64, [][][
 
 		// count delta
 		PredictLayers[i+1] = (*c.Layers)[i].Prime(PredictLayers[i+1])
-		//target = (*c.Layers)[i].Prime(target)
+		target = (*c.Layers)[i].Prime(target)
 		for j := range PredictLayers[i+1] {
 			PredictLayers[i+1][j] = (PredictLayers[i+1][j] - target[j]) * 2
 		}
