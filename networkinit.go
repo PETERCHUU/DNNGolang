@@ -107,6 +107,26 @@ func (c Chain) RNN() Chain {
 	return c
 }
 
+func (c Chain) Copy() Chain {
+	L := make([]FCLayer, len(*c.Layers))
+	for i := 0; i < len(*c.Layers); i++ {
+		N := make([]Neuron, len(*(*c.Layers)[i].Neurons))
+		B := make([]float64, len(*(*c.Layers)[i].Bias))
+		for j := 0; j < len(*(*c.Layers)[i].Bias); j++ {
+			B[j] = (*(*c.Layers)[i].Bias)[j]
+		}
+		for j := 0; j < len(*(*c.Layers)[i].Neurons); j++ {
+			W := make([]float64, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
+			for k := 0; k < len(*(*(*c.Layers)[i].Neurons)[j].Weights); k++ {
+				W[k] = (*(*(*c.Layers)[i].Neurons)[j].Weights)[k]
+			}
+			N[j] = Neuron{Weights: &W}
+		}
+		L[i] = FCLayer{LearningRate: (*c.Layers)[i].LearningRate, Neurons: &N, Activation: (*c.Layers)[i].Activation, Prime: (*c.Layers)[i].Prime, Bias: &B, ActivateEnum: (*c.Layers)[i].ActivateEnum}
+	}
+	return Chain{Layers: &L}
+}
+
 // RNN
 /*
 	model := nnfcgolang.NewNetwork().RNN(7,32,169,activation.Sigmoid,activation.Softmax)

@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	trainingDataPath  = "Sample/train/train-images.idx3-ubyte"
-	trainingLabelPath = "Sample/train/train-labels.idx1-ubyte"
-	testDataPath      = "Sample/train/t10k-images.idx3-ubyte"
-	testLabelPath     = "Sample/train/t10k-labels.idx1-ubyte"
+	trainingDataPath  = "Mnist/train/train-images.idx3-ubyte"
+	trainingLabelPath = "Mnist/train/train-labels.idx1-ubyte"
+	testDataPath      = "Mnist/train/t10k-images.idx3-ubyte"
+	testLabelPath     = "Mnist/train/t10k-labels.idx1-ubyte"
 
 	sampleRate   = 1000
 	learningRate = 0.15
@@ -20,7 +20,7 @@ const (
 func Run() {
 	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).FCLayer(49, 23, function.Sigmoid, learningRate).
 		FCLayer(23, 10, function.Softmax, learningRate)
-	//betterModule := module
+	betterModule := module.Copy()
 	var accurate float64
 	sample := FileReader.InitSample(trainingDataPath, trainingLabelPath)
 	tester := FileReader.InitSample(testDataPath, testLabelPath)
@@ -47,13 +47,16 @@ func Run() {
 		thisAccurate := calculateAccurate(&module, tester)
 		if thisAccurate > accurate {
 			accurate = thisAccurate
-			//betterModule = module
+			betterModule = module.Copy()
 		}
-		fmt.Printf("Accurate after %d train: %.4f\n", i, accurate)
+		fmt.Printf("Accurate after %d train: %.4f\n", i, thisAccurate)
 	}
 
-	//fmt.Printf("after weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
-	fmt.Printf("Accurate after train: %.4f\n", calculateAccurate(&module, tester))
+	fmt.Printf("after weight %.2f", (*(*betterModule.Layers)[2].Neurons)[3].Weights)
+
+	accurate = calculateAccurate(&betterModule, tester)
+
+	fmt.Printf("Accurate after train: %.4f\n", accurate)
 }
 
 func calculateAccurate(module *nnfcgolang.Chain, sample []FileReader.MnstSample) float64 {
