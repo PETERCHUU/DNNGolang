@@ -49,7 +49,7 @@ func TestFCLayer(t *testing.T) {
 func TestPredict(t *testing.T) {
 	FCnetwork := nnfcgolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
-	data := []float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+	data := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	output := FCnetwork.Predict(data)
 	fmt.Println()
 	for i := range output {
@@ -60,14 +60,14 @@ func TestPredict(t *testing.T) {
 func TestRNNpredict(t *testing.T) {
 	nn := nnfcgolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
-	nn.Predict([]float32{1, 2, 3, 4, 5, 6, 7, 8})
+	nn.Predict([]float64{1, 2, 3, 4, 5, 6, 7, 8})
 
 }
 
 func BenchmarkPredict(t *testing.B) {
 	FCnetwork := nnfcgolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
-	data := []float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+	data := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	output := FCnetwork.Predict(data)
 	fmt.Println()
 	for i := range output {

@@ -14,11 +14,11 @@ const (
 	testLabelPath     = "Sample/train/t10k-labels.idx1-ubyte"
 
 	sampleRate   = 1000
-	learningRate = 0.02
+	learningRate = 0.03
 )
 
 func main() {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).FCLayer(49, 23, function.Sigmoid, learningRate).
+	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.ReLU, learningRate).FCLayer(49, 23, function.ReLU, learningRate).
 		FCLayer(23, 10, function.Softmax, learningRate)
 	sample := Sample.InitSample(trainingDataPath, trainingLabelPath)
 	tester := Sample.InitSample(testDataPath, testLabelPath)
@@ -29,14 +29,14 @@ func main() {
 	// 	module.BackProp(v.Image[:], v.Label[:], learningRate)
 	// 	//fmt.Printf("before weight %.2f", (*(*module.Layers)[2].Neurons)[3].Weights)
 	// 	if i%1000 == 0 {
-	// 		fmt.Printf("Accurate after %d train: %.2f\n", i, calculateAccurate(&module, tester))
+	// 		fmt.Printf("Accurate after %d train: %.4f\n", i, calculateAccurate(&module, tester))
 	// 	}
 	// }
 
-	for i := 0; i < len(sample); i += 1000 {
-		sampleInput := make([][]float32, 1000)
-		sampleTarget := make([][]float32, 1000)
-		for j := 0; j < 1000; j++ {
+	for i := 0; i < len(sample); i += sampleRate {
+		sampleInput := make([][]float64, sampleRate)
+		sampleTarget := make([][]float64, sampleRate)
+		for j := 0; j < sampleRate; j++ {
 			sampleInput[j] = sample[i+j].Image[:]
 			sampleTarget[j] = sample[i+j].Label[:]
 		}
@@ -49,12 +49,13 @@ func main() {
 	fmt.Printf("Accurate after train: %.4f\n", calculateAccurate(&module, tester))
 }
 
-func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) float32 {
-	var accurate float32
+func calculateAccurate(module *nnfcgolang.Chain, sample []Sample.MnstSample) float64 {
+	var accurate float64
 	for _, v := range sample {
 		predict := module.Predict(v.Image[:])
 		accurate += nnfcgolang.Accurate(predict, v.Label[:])
 	}
-	accurate /= float32(len(sample))
+
+	accurate /= float64(len(sample))
 	return accurate
 }

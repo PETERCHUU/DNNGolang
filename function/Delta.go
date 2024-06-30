@@ -1,6 +1,6 @@
 package function
 
-func NormalDelta(output, target []float32) []float32 {
+func NormalDelta(output, target []float64) []float64 {
 	for i := range output {
 		output[i] = (output[i] - target[i]) * 2
 	}

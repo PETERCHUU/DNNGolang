@@ -12,14 +12,14 @@ import (
 
 const (
 	filenameF string  = "model%s.bin"
-	version   float32 = 0.01
+	version   float64 = 0.01
 	cost      int32   = 0
 )
 
 type moduleInfo struct {
-	version    float32
+	version    float64
 	createDate time.Time
-	cost       float32
+	cost       float64
 	length     int32
 }
 
@@ -145,7 +145,7 @@ func Read(path string) *Chain {
 
 }
 
-func readFile(file *os.File, length int32, cost float32) *Chain {
+func readFile(file *os.File, length int32, cost float64) *Chain {
 	layer := make([]FCLayer, length)
 	var Chain Chain
 	Chain.Layers = &layer
@@ -159,7 +159,7 @@ func readFile(file *os.File, length int32, cost float32) *Chain {
 			var this int
 			var next int
 			var activate int32
-			var rate float32
+			var rate float64
 			binary.Read(file, binary.BigEndian, &this)
 			binary.Read(file, binary.BigEndian, &next)
 			binary.Read(file, binary.BigEndian, &activate)

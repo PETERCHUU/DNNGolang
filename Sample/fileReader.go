@@ -7,8 +7,8 @@ import (
 )
 
 type MnstSample struct {
-	Label [10]float32  // nn output
-	Image [784]float32 // nn input
+	Label [10]float64  // nn output
+	Image [784]float64 // nn input
 }
 
 func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
@@ -56,7 +56,7 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 		if err != nil && err != io.EOF {
 			panic(err)
 		}
-		label := [10]float32{}
+		label := [10]float64{}
 		switch LabelBuffer % 10 {
 		case 0:
 			label[0] = 1
@@ -83,7 +83,7 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 		Sample[i].Label = label
 
 		for j := 0; j < 784; j++ {
-			Sample[i].Image[j] = float32(ImageBuffer[j])
+			Sample[i].Image[j] = float64(ImageBuffer[j])
 		}
 
 		if err == io.EOF || i >= int(length)-1 {

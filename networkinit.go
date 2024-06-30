@@ -38,26 +38,26 @@ model.saveAs("model.toml")
 // Neuron is a struct of neuron,
 // float32 ready for CUDA
 type Neuron struct {
-	Weights *[]float32 // len is number of next layer
+	Weights *[]float64 // len is number of next layer
 }
 
 // FCLayer is a struct of layer
 type FCLayer struct {
 	NNtype       NNType
-	LearningRate float32
-	Bias         *[]float32 // len is number of next layer
+	LearningRate float64
+	Bias         *[]float64 // len is number of next layer
 	Neurons      *[]Neuron  // len is number of this layer
 	ActivateEnum function.Activation
-	Activation   func(x []float32) []float32
-	Prime        func(x []float32) []float32
+	Activation   func(x []float64) []float64
+	Prime        func(x []float64) []float64
 }
 
 // Chain is a struct of model
 type Chain struct {
-	Cost   func(predict, target float32) float32
+	Cost   func(predict, target float64) float64
 	Layers *[]FCLayer
 	Cache  *[]FCLayer
-	input  *[][]float32
+	input  *[][]float64
 }
 
 //FCinit(30,16,activation.Sigmoid)
@@ -74,14 +74,14 @@ func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Chain {
+func (c Chain) FCLayer(n int, next int, f function.Activation, rate float64) Chain {
 	I, O := function.ActivationFunc(f)
 	L := make([]Neuron, n)
-	B := make([]float32, next)
+	B := make([]float64, next)
 
 	if len(*c.Layers) == 0 {
 		for i := 0; i < n; i++ {
-			W := make([]float32, next)
+			W := make([]float64, next)
 			L[i] = Neuron{Weights: &W}
 		}
 	} else {
@@ -92,7 +92,7 @@ func (c Chain) FCLayer(n int, next int, f function.Activation, rate float32) Cha
 			panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
 		}
 		for i := 0; i < n; i++ {
-			W := make([]float32, next)
+			W := make([]float64, next)
 			L[i] = Neuron{Weights: &W}
 		}
 	}

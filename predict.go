@@ -1,6 +1,8 @@
 package nnfcgolang
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	IRnn bool = false
@@ -11,7 +13,7 @@ var (
 append input with
 */
 
-func (c Chain) Predict(data []float32) []float32 {
+func (c Chain) Predict(data []float64) []float64 {
 	if len(data) == 0 {
 		panic("data length is 0")
 	}
@@ -23,7 +25,7 @@ func (c Chain) Predict(data []float32) []float32 {
 	return data
 }
 
-func (c Chain) FCpredict(data []float32, index int) []float32 {
+func (c Chain) FCpredict(data []float64, index int) []float64 {
 	if len(data) != len(*(*c.Layers)[index].Neurons) {
 		panic("data length not match")
 	}
@@ -45,12 +47,12 @@ func (c Chain) FCpredict(data []float32, index int) []float32 {
 	return (*c.Layers)[index].Activation(data[:len(*(*c.Layers)[index].Bias)])
 }
 
-func (c Chain) PredictLayer(data []float32) ([][]float32, error) {
+func (c Chain) PredictLayer(data []float64) ([][]float64, error) {
 	if len(data) != len(*(*c.Layers)[0].Neurons) {
 		return nil, errors.New("data length not match")
 	}
 
-	var PredictData [][]float32
+	var PredictData [][]float64
 	PredictData = append(PredictData, data)
 	for i := 0; i < len(*c.Layers); i++ {
 		PredictData = append(PredictData, c.FCpredict(PredictData[i], i))

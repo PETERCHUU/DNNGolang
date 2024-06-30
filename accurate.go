@@ -1,7 +1,7 @@
 package nnfcgolang
 
-func (c Chain) calculateAccurate(inputs, targets [][]float32) float32 {
-	var accurate float32
+func (c Chain) calculateAccurate(inputs, targets [][]float64) float64 {
+	var accurate float64
 	if len(inputs) != len(targets) {
 		panic("dataFormate error, input len != target len")
 	}
@@ -10,6 +10,6 @@ func (c Chain) calculateAccurate(inputs, targets [][]float32) float32 {
 
 		accurate += Accurate(predict, targets[i])
 	}
-	accurate /= float32(len(inputs))
+	accurate /= float64(len(inputs))
 	return accurate
 }

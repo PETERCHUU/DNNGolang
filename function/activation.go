@@ -15,7 +15,7 @@ const (
 	Softmax
 )
 
-func GetEnum(function func(x []float32) []float32) int32 {
+func GetEnum(function func(x []float64) []float64) int32 {
 	if reflect.DeepEqual(function, SigmoidIn) {
 		return 0
 	}
@@ -35,7 +35,7 @@ func GetEnum(function func(x []float32) []float32) int32 {
 
 }
 
-func ActivationFunc(activation Activation) (func(x []float32) []float32, func(x []float32) []float32) {
+func ActivationFunc(activation Activation) (func(x []float64) []float64, func(x []float64) []float64) {
 	switch activation {
 	case Sigmoid:
 		return SigmoidIn, SigmoidOut
@@ -52,47 +52,45 @@ func ActivationFunc(activation Activation) (func(x []float32) []float32, func(x 
 
 }
 
-func SigmoidIn(x []float32) []float32 {
+func SigmoidIn(x []float64) []float64 {
 	for i := range x {
-		x[i] = 1 / (1 + float32(math.Exp(float64(-x[i]))))
+		x[i] = 1 / (1 + math.Exp(-x[i]))
 
 	}
 	return x
 }
 
-func SigmoidOut(x []float32) []float32 {
+func SigmoidOut(x []float64) []float64 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
 	return x
 }
 
-func TanhIn(x []float32) []float32 {
+func TanhIn(x []float64) []float64 {
 	for i := range x {
-		x[i] = float32(math.Tanh(float64(x[i])))
+		x[i] = math.Tanh(x[i])
 	}
 	return x
 }
 
-func TanhOut(x []float32) []float32 {
+func TanhOut(x []float64) []float64 {
 	for i := range x {
 		x[i] = 1 - x[i]*x[i]
 	}
 	return x
 }
 
-func ReLUIn(x []float32) []float32 {
+func ReLUIn(x []float64) []float64 {
 	for i := range x {
-		if x[i] > 0 {
-			x[i] = x[i]
-		} else {
+		if x[i] < 0 || math.IsNaN(x[i]) {
 			x[i] = 0
 		}
 	}
 	return x
 }
 
-func ReLUOut(x []float32) []float32 {
+func ReLUOut(x []float64) []float64 {
 	for i := range x {
 		if x[i] > 0 {
 			x[i] = 1
@@ -103,33 +101,37 @@ func ReLUOut(x []float32) []float32 {
 	return x
 }
 
-func SwishIn(x []float32) []float32 {
+func SwishIn(x []float64) []float64 {
 	for i := range x {
-		x[i] = x[i] / (1 + float32(math.Exp(float64(-x[i]))))
+		x[i] = x[i] / (1 + math.Exp(-x[i]))
 
 	}
 	return x
 }
-func SwishOut(x []float32) []float32 {
+func SwishOut(x []float64) []float64 {
 	for i := range x {
-		x[i] = x[i] + (1-x[i])/(1+float32(math.Exp(float64(-x[i]))))
+		x[i] = x[i] + (1-x[i])/(1+math.Exp(-x[i]))
 
 	}
 	return x
 }
 
-func SoftmaxIn(x []float32) []float32 {
-	var sum float32
+func SoftmaxIn(x []float64) []float64 {
+	var sum float64
 	for i := range x {
-		sum += float32(math.Exp(float64(x[i])))
+		sum += x[i]
 	}
 	for i := range x {
-		x[i] = float32(math.Exp(float64(x[i]))) / sum
+		x[i] = math.Exp(x[i]) / sum
+		if math.IsNaN(x[i]) {
+			x[i] = 0
+		}
+
 	}
 	return x
 }
 
-func SoftmaxOut(x []float32) []float32 {
+func SoftmaxOut(x []float64) []float64 {
 	for i := range x {
 		x[i] = x[i] * (1 - x[i])
 	}
