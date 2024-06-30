@@ -18,8 +18,8 @@ const (
 )
 
 func Run() {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).FCLayer(49, 23, function.Sigmoid, learningRate).
-		FCLayer(23, 10, function.Softmax, learningRate)
+	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
+		FCLayer(49, 10, function.Softmax, learningRate)
 	betterModule := module.Copy()
 	var accurate float64
 	sample := FileReader.InitSample(trainingDataPath, trainingLabelPath)
@@ -52,7 +52,7 @@ func Run() {
 		fmt.Printf("Accurate after %d train: %.4f\n", i, thisAccurate)
 	}
 
-	fmt.Printf("after weight %.2f", (*(*betterModule.Layers)[2].Neurons)[3].Weights)
+	//fmt.Printf("after weight %.2f", (*(*betterModule.Layers)[2].Neurons)[3].Weights)
 
 	accurate = calculateAccurate(&betterModule, tester)
 

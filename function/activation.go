@@ -123,9 +123,6 @@ func SoftmaxIn(x []float64) []float64 {
 	}
 	for i := range x {
 		x[i] = math.Exp(x[i]) / sum
-		if math.IsNaN(x[i]) {
-			x[i] = 0
-		}
 
 	}
 	return x
