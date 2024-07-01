@@ -1,6 +1,7 @@
 package nnfcgolang
 
 import (
+	"math/rand"
 	"nnfcgolang/function"
 )
 
@@ -125,6 +126,20 @@ func (c Chain) Copy() Chain {
 		L[i] = FCLayer{LearningRate: (*c.Layers)[i].LearningRate, Neurons: &N, Activation: (*c.Layers)[i].Activation, Prime: (*c.Layers)[i].Prime, Bias: &B, ActivateEnum: (*c.Layers)[i].ActivateEnum}
 	}
 	return Chain{Layers: &L}
+}
+
+func (c *Chain) Random() {
+	for i := 0; i < len(*c.Layers); i++ {
+		for j := 0; j < len(*(*c.Layers)[i].Neurons); j++ {
+			for k := 0; k < len(*(*(*c.Layers)[i].Neurons)[j].Weights); k++ {
+				(*(*(*c.Layers)[i].Neurons)[j].Weights)[k] = rand.Float64()
+			}
+		}
+		for j := 0; j < len(*(*c.Layers)[i].Bias); j++ {
+			(*(*c.Layers)[i].Bias)[j] = rand.Float64()
+		}
+	}
+
 }
 
 // RNN
