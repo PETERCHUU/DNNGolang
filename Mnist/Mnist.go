@@ -17,7 +17,7 @@ const (
 	learningRate = 0.15
 )
 
-func Run() {
+func Run() nnfcgolang.Chain {
 	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
 		FCLayer(49, 10, function.Softmax, learningRate)
 	betterModule := module.Copy()
@@ -25,7 +25,7 @@ func Run() {
 	sample := FileReader.InitSample(trainingDataPath, trainingLabelPath)
 	tester := FileReader.InitSample(testDataPath, testLabelPath)
 
-	fmt.Printf("Accurate before train: %.2f\n", calculateAccurate(&module, tester))
+	fmt.Printf("Accurate before train: %.2f\n", CalculateAccurate(&module, tester))
 
 	// for i, v := range sample {
 	// 	module.BackProp(v.Image[:], v.Label[:], learningRate)
@@ -44,7 +44,7 @@ func Run() {
 		}
 
 		module.UpdateMiniBatch(sampleInput, sampleTarget, sampleRate, learningRate)
-		thisAccurate := calculateAccurate(&module, tester)
+		thisAccurate := CalculateAccurate(&module, tester)
 		if thisAccurate > accurate {
 			accurate = thisAccurate
 			betterModule = module.Copy()
@@ -54,12 +54,13 @@ func Run() {
 
 	//fmt.Printf("after weight %.2f", (*(*betterModule.Layers)[2].Neurons)[3].Weights)
 
-	accurate = calculateAccurate(&betterModule, tester)
+	accurate = CalculateAccurate(&betterModule, tester)
 
 	fmt.Printf("Accurate after train: %.4f\n", accurate)
+	return betterModule
 }
 
-func calculateAccurate(module *nnfcgolang.Chain, sample []FileReader.MnstSample) float64 {
+func CalculateAccurate(module *nnfcgolang.Chain, sample []FileReader.MnstSample) float64 {
 	var accurate float64
 	for _, v := range sample {
 		predict := module.Predict(v.Image[:])

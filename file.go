@@ -124,7 +124,7 @@ func writeBin(file *os.File, field interface{}) {
 	}
 }
 
-func Read(path string) *Chain {
+func Load(path string) *Chain {
 	file, err := os.Open(path)
 	if err != nil {
 		print(err)
