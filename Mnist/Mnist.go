@@ -13,8 +13,8 @@ const (
 	testDataPath      = "Mnist/train/t10k-images.idx3-ubyte"
 	testLabelPath     = "Mnist/train/t10k-labels.idx1-ubyte"
 
-	sampleRate   = 1000
-	learningRate = 0.15
+	sampleRate           = 1000
+	learningRate float64 = 0.15
 )
 
 func Run() nnfcgolang.Chain {

@@ -75,13 +75,15 @@ func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
-func (c Chain) FCLayer(n int, next int, f function.Activation, rate float64) Chain {
+func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64) Chain {
 	I, O := function.ActivationFunc(f)
+	println("layer init")
+	println(f)
 	L := make([]Neuron, n)
 	B := make([]float64, next)
 
 	if len(*c.Layers) == 0 {
-		for i := 0; i < n; i++ {
+		for i := 0; i < int(n); i++ {
 			W := make([]float64, next)
 			L[i] = Neuron{Weights: &W}
 		}
@@ -89,10 +91,10 @@ func (c Chain) FCLayer(n int, next int, f function.Activation, rate float64) Cha
 		if (*c.Layers)[len(*c.Layers)-1].NNtype == RNN {
 			panic("RNN must be the last layer")
 		}
-		if len(*(*(*c.Layers)[len(*c.Layers)-1].Neurons)[0].Weights) != n {
+		if len(*(*(*c.Layers)[len(*c.Layers)-1].Neurons)[0].Weights) != int(n) {
 			panic("The number of neurons in the previous layer does not match the number of neurons in the current layer")
 		}
-		for i := 0; i < n; i++ {
+		for i := 0; i < int(n); i++ {
 			W := make([]float64, next)
 			L[i] = Neuron{Weights: &W}
 		}

@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-type Activation int
+type Activation int32
 
 const (
 	Sigmoid Activation = iota

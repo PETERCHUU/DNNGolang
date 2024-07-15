@@ -18,12 +18,12 @@ const (
 
 type moduleInfo struct {
 	version    float64
-	createDate time.Time
+	createDate int64
 	cost       float64
 	length     int32
 }
 
-func (c *Chain) Save() error {
+func (c *Chain) Save() (string, error) {
 
 	createTime := time.Now()
 	filename := fmt.Sprintf(filenameF, createTime.Format("2006-01-02_15-04"))
@@ -36,50 +36,60 @@ func (c *Chain) Save() error {
 		input.Scan()
 		aug := input.Text()
 		if aug == "N" || aug == "n" {
-			return nil
+			return "", nil
 		}
 		// delete file
 		err := os.Remove(filename)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	// create file
 	file, err := os.Create(filename)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 	// Network Info
 	c.writeNetworkInfo(file, createTime)
 
 	// Layer Info
-	c.writeLayerInfo(file)
+	c.writeLayerInfo(file, 0)
 
 	// Weight Info
 	c.writeNeuronInfo(file)
 
-	return nil
+	return filename, nil
 
 }
 
 func (c *Chain) writeNetworkInfo(file *os.File, date time.Time) {
 	info := moduleInfo{
 		version:    0.1,
-		createDate: date,
+		createDate: date.Unix(),
 		cost:       0,
 		length:     int32(len(*c.Layers)),
 	}
-	writeBin(file, info)
+	binary.Write(file, binary.NativeEndian, info.version)
+	binary.Write(file, binary.NativeEndian, info.createDate)
+	binary.Write(file, binary.NativeEndian, info.cost)
+	binary.Write(file, binary.NativeEndian, info.length)
 }
 
-func (c *Chain) writeLayerInfo(file *os.File) {
+func (c *Chain) writeLayerInfo(file *os.File, LayerType int32) {
 	for _, l := range *c.Layers {
-		binary.Write(file, binary.BigEndian, len(*l.Neurons)) // this length
-		binary.Write(file, binary.BigEndian, len(*l.Bias))    // next length
-		binary.Write(file, binary.BigEndian, function.GetEnum(l.Activation))
+		binary.Write(file, binary.BigEndian, LayerType)              // layer type
+		binary.Write(file, binary.BigEndian, int32(len(*l.Neurons))) // this length
+		binary.Write(file, binary.BigEndian, int32(len(*l.Bias)))    // next length
+		binary.Write(file, binary.BigEndian, int32(l.ActivateEnum))
 		binary.Write(file, binary.BigEndian, l.LearningRate)
+		println("write file layer")
+		println(LayerType)
+		println(int32(len(*l.Neurons)))
+		println(int32(len(*l.Bias)))
+		println(int32(l.ActivateEnum))
+		fmt.Printf("%.2f\n", l.LearningRate)
 	}
 }
 
@@ -103,6 +113,74 @@ func (c *Chain) writeNeuronInfo(file *os.File) {
 // }
 // defer file.Close()
 
+func Load(path string) *Chain {
+	file, err := os.Open(path)
+	if err != nil {
+		print(err)
+		return nil
+	}
+	defer file.Close()
+	var info moduleInfo
+	binary.Read(file, binary.NativeEndian, &info.version)
+	binary.Read(file, binary.NativeEndian, &info.createDate)
+	binary.Read(file, binary.NativeEndian, &info.cost)
+	err = binary.Read(file, binary.NativeEndian, &info.length)
+	if err != nil {
+		println(err.Error())
+	}
+	switch info.version {
+	case 0.1:
+		fallthrough
+	default:
+		return readFile(file, info.length, info.cost)
+	}
+
+}
+
+func readFile(file *os.File, length int32, cost float64) *Chain {
+	//layer := make([]FCLayer, length)
+	var Chain Chain = NewNetwork()
+	//Chain.Layers = &layer
+	Chain.Cost = Cost
+	var LayerType int32
+
+	var this int32
+	var next int32
+	var activate int32
+	var rate float64
+
+	for i := 0; i < int(length); i++ {
+		binary.Read(file, binary.BigEndian, &LayerType)
+		println("read file layer")
+		println(LayerType)
+		switch LayerType {
+		default:
+			binary.Read(file, binary.BigEndian, &this)
+			binary.Read(file, binary.BigEndian, &next)
+			binary.Read(file, binary.BigEndian, &activate)
+			binary.Read(file, binary.BigEndian, &rate)
+			println(this)
+			println(next)
+			functionActive := function.Activation(activate)
+			println(functionActive)
+			fmt.Printf("%.2f\n", rate)
+			Chain.FCLayer(this, next, functionActive, rate)
+		}
+	}
+	// read bias
+	for i := 0; i < len(*Chain.Layers); i++ {
+		for j := 0; j < len(*(*Chain.Layers)[i].Bias); j++ {
+			binary.Read(file, binary.BigEndian, &(*(*Chain.Layers)[i].Bias)[j])
+		}
+		for j := 0; j < len(*(*Chain.Layers)[i].Neurons); j++ {
+			for k := 0; k < len(*(*(*Chain.Layers)[i].Neurons)[j].Weights); k++ {
+				binary.Read(file, binary.BigEndian, &(*(*(*Chain.Layers)[i].Neurons)[j].Weights)[k])
+			}
+		}
+	}
+	return &Chain
+}
+
 func writeBin(file *os.File, field interface{}) {
 	value := reflect.ValueOf(field)
 	switch value.Kind() {
@@ -122,61 +200,4 @@ func writeBin(file *os.File, field interface{}) {
 	default:
 		binary.Write(file, binary.BigEndian, value)
 	}
-}
-
-func Load(path string) *Chain {
-	file, err := os.Open(path)
-	if err != nil {
-		print(err)
-		return nil
-	}
-	defer file.Close()
-	var info moduleInfo
-	binary.Read(file, binary.BigEndian, &info.version)
-	binary.Read(file, binary.BigEndian, &info.createDate)
-	binary.Read(file, binary.BigEndian, &info.cost)
-	binary.Read(file, binary.BigEndian, &info.length)
-	switch info.version {
-	case 0.1:
-		fallthrough
-	default:
-		return readFile(file, info.length, info.cost)
-	}
-
-}
-
-func readFile(file *os.File, length int32, cost float64) *Chain {
-	layer := make([]FCLayer, length)
-	var Chain Chain
-	Chain.Layers = &layer
-	Chain.Cost = Cost
-	var LayerType int32
-
-	for i := 0; i < int(length); i++ {
-		binary.Read(file, binary.BigEndian, &LayerType)
-		switch LayerType {
-		default:
-			var this int
-			var next int
-			var activate int32
-			var rate float64
-			binary.Read(file, binary.BigEndian, &this)
-			binary.Read(file, binary.BigEndian, &next)
-			binary.Read(file, binary.BigEndian, &activate)
-			binary.Read(file, binary.BigEndian, &rate)
-			Chain.FCLayer(this, next, function.Activation(activate), rate)
-		}
-	}
-	// read bias
-	for i := 0; i < len(*Chain.Layers); i++ {
-		for j := 0; j < len(*(*Chain.Layers)[i].Bias); j++ {
-			binary.Read(file, binary.BigEndian, &(*(*Chain.Layers)[i].Bias)[j])
-		}
-		for j := 0; j < len(*(*Chain.Layers)[i].Neurons); j++ {
-			for k := 0; k < len(*(*(*Chain.Layers)[i].Neurons)[j].Weights); k++ {
-				binary.Read(file, binary.BigEndian, &(*(*(*Chain.Layers)[i].Neurons)[j].Weights)[k])
-			}
-		}
-	}
-	return &Chain
 }
