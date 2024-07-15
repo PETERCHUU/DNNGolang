@@ -1,8 +1,9 @@
-package nnfcgolang
+package DNNGolang
 
 import (
 	"math/rand"
-	"nnfcgolang/function"
+
+	"github.com/PETERCHUU/DNNGolang/function"
 )
 
 type NNType int

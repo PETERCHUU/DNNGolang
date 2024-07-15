@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"nnfcgolang"
-	"nnfcgolang/Mnist"
-	"nnfcgolang/Mnist/FileReader"
+
+	"github.com/PETERCHUU/DNNGolang"
+	"github.com/PETERCHUU/DNNGolang/Mnist"
+	"github.com/PETERCHUU/DNNGolang/Mnist/FileReader"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	newModule := nnfcgolang.Load(filename)
+	newModule := DNNGolang.Load(filename)
 	tester := FileReader.InitSample(testDataPath, testLabelPath)
 	fmt.Printf("Accurate using output Module: %.4f\n", Mnist.CalculateAccurate(newModule, tester))
 }

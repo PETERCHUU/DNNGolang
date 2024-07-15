@@ -2,9 +2,10 @@ package Mnist
 
 import (
 	"fmt"
-	"nnfcgolang"
-	"nnfcgolang/Mnist/FileReader"
-	"nnfcgolang/function"
+
+	"github.com/PETERCHUU/DNNGolang"
+	"github.com/PETERCHUU/DNNGolang/Mnist/FileReader"
+	"github.com/PETERCHUU/DNNGolang/function"
 )
 
 const (
@@ -17,8 +18,8 @@ const (
 	learningRate float64 = 0.15
 )
 
-func Run() nnfcgolang.Chain {
-	module := nnfcgolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
+func Run() DNNGolang.Chain {
+	module := DNNGolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
 		FCLayer(49, 10, function.Softmax, learningRate)
 	betterModule := module.Copy()
 	var accurate float64
@@ -60,11 +61,11 @@ func Run() nnfcgolang.Chain {
 	return betterModule
 }
 
-func CalculateAccurate(module *nnfcgolang.Chain, sample []FileReader.MnstSample) float64 {
+func CalculateAccurate(module *DNNGolang.Chain, sample []FileReader.MnstSample) float64 {
 	var accurate float64
 	for _, v := range sample {
 		predict := module.Predict(v.Image[:])
-		accurate += nnfcgolang.Accurate(predict, v.Label[:])
+		accurate += DNNGolang.Accurate(predict, v.Label[:])
 	}
 
 	accurate /= float64(len(sample))

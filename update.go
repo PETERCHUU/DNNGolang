@@ -1,4 +1,4 @@
-package nnfcgolang
+package DNNGolang
 
 import (
 	"errors"

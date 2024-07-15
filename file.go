@@ -1,13 +1,14 @@
-package nnfcgolang
+package DNNGolang
 
 import (
 	"bufio"
 	"encoding/binary"
 	"fmt"
-	"nnfcgolang/function"
 	"os"
 	"reflect"
 	"time"
+
+	"github.com/PETERCHUU/DNNGolang/function"
 )
 
 const (
