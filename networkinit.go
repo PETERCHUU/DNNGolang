@@ -62,6 +62,14 @@ type Chain struct {
 	input  *[][]float64
 }
 
+// Chain is a struct of model
+type RNNChain struct {
+	Cost   func(predict, target float64) float64
+	Layers *[]FCLayer
+	Cache  *[]FCLayer
+	input  *[][]float64
+}
+
 //FCinit(30,16,activation.Sigmoid)
 
 /*
