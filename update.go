@@ -5,6 +5,20 @@ import (
 	"math"
 )
 
+/*
+
+target function
+
+model.TrainBy(adam)
+
+model.windowSize(int)
+
+model.train(data) [][]float32
+
+model.test(testdata)
+
+*/
+
 // one target at a time
 func (c *Chain) BackProp(input, target []float64, learningRate float64) ([][]float64, [][][]float64, error) {
 	// get every act in every layer

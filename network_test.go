@@ -47,6 +47,13 @@ func TestFCLayer(t *testing.T) {
 	t.Log("haha")
 }
 
+func TestRNN(t *testing.T) {
+	nn := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).RNN()
+	println(len(*nn.Layers))
+	t.Log("RNN created")
+
+}
+
 func TestPredict(t *testing.T) {
 	FCnetwork := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)

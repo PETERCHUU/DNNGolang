@@ -19,13 +19,13 @@ func (c Chain) Predict(data []float64) []float64 {
 	}
 
 	for i := range *c.Layers {
-		data = c.FCpredict(data, i)
+		data = c.FCPredict(data, i)
 	}
 
 	return data
 }
 
-func (c Chain) FCpredict(data []float64, index int) []float64 {
+func (c Chain) FCPredict(data []float64, index int) []float64 {
 	if len(data) != len(*(*c.Layers)[index].Neurons) {
 		panic("data length not match")
 	}
@@ -55,7 +55,7 @@ func (c Chain) PredictLayer(data []float64) ([][]float64, error) {
 	var PredictData [][]float64
 	PredictData = append(PredictData, data)
 	for i := 0; i < len(*c.Layers); i++ {
-		PredictData = append(PredictData, c.FCpredict(PredictData[i], i))
+		PredictData = append(PredictData, c.FCPredict(PredictData[i], i))
 	}
 
 	return PredictData, nil
