@@ -21,10 +21,14 @@ func (c Chain) RNNPredict(DataList [][]float64) []float64 {
 		panic("Predict input length cannot be 0")
 	}
 	for i := 0; i < len(DataList)-1; i++ {
-		DataList[i+1] = append(DataList[i+1], c.Predict(DataList[i])...)
+		print("printStart with ")
+		println(i)
+
+		output := c.Predict(DataList[i])
+		println(output)
+		DataList[i+1] = append(DataList[i+1], output...)
 	}
 	return c.Predict(DataList[len(DataList)-1])
-
 }
 
 func (c Chain) Predict(data []float64) []float64 {
@@ -40,19 +44,37 @@ func (c Chain) Predict(data []float64) []float64 {
 }
 
 func (c Chain) FCPredict(data []float64, index int) []float64 {
-	if len(data) != len(*(*c.Layers)[index].Neurons) {
-		panic("data length not match")
+	if len(data) > len(*(*c.Layers)[index].Neurons) {
+		// doing this as First RNN return
+		panic("Data length is less then neurons")
 	}
+	print("the length of data is ")
+	println(len(data))
+
 	for _, n := range *(*c.Layers)[index].Neurons {
 		i := 0
+
+		println(data[i])
+		print("the length of ")
+		print(index)
+		print(" bias have ")
+		print(len(*(*c.Layers)[index].Bias))
+		println(" of number of length")
+		println()
+		print("the length of weights is ")
+		print(len(*n.Weights))
+		println(" of index")
+
 		thisData := data[i]
 		data[i] = (*n.Weights)[i] * thisData
 		i++
+
 		for i < len(*(*c.Layers)[index].Bias) {
 			data[i] += (*n.Weights)[i] * thisData
 			i++
 		}
 	}
+
 	for i, b := range *(*c.Layers)[index].Bias {
 		data[i] += b
 	}

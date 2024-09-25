@@ -67,8 +67,13 @@ func TestPredict(t *testing.T) {
 
 func TestRNNpredict(t *testing.T) {
 	nn := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
-		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
-	nn.Predict([]float64{1, 2, 3, 4, 5, 6, 7, 8})
+		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate).RNN()
+	twoDArray := make([][]float64, 10)
+	for i := 0; i < len(twoDArray); i++ {
+		println(twoDArray)
+		twoDArray[i] = []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+	}
+	nn.RNNPredict(twoDArray)
 
 }
 

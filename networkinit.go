@@ -93,7 +93,6 @@ func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64)
 	//println(f)
 	L := make([]Neuron, n)
 	B := make([]float64, next)
-
 	if len(*c.Layers) == 0 {
 		for i := 0; i < int(n); i++ {
 			W := make([]float64, next)
@@ -121,15 +120,16 @@ func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64)
 
 func (c Chain) RNN() Chain {
 	input := len(*(*c.Layers)[0].Neurons) + len(*(*c.Layers)[len(*c.Layers)-1].Bias)
-	*(*c.Layers)[0].Neurons = make([]Neuron, input)
 
-	for i := 0; i < input; i++ {
-		W := make([]float64, len(*(*c.Layers)[len(*c.Layers)-1].Bias))
-		(*(*c.Layers)[0].Neurons)[i] = Neuron{Weights: &W}
+	weigthLength := len(*(*c.Layers)[0].Bias)
+
+	for i := len(*(*c.Layers)[0].Bias) - 1; i < input; i++ {
+		W := make([]float64, weigthLength)
+		*(*c.Layers)[0].Neurons = append(*(*c.Layers)[0].Neurons, Neuron{Weights: &W})
 	}
 
 	(*c.Layers)[len(*c.Layers)-1].NNtype = RNN
-
+	println("RNN created")
 	return c
 
 }
