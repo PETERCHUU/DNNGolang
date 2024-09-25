@@ -80,14 +80,6 @@ func (c *Chain) Train(input, target []float64, learningRate float64) {
 	c.BackProp(input, target, learningRate)
 }
 
-func Accurate(predict, target []float64) float64 {
-	var sum float64
-	for i := range predict {
-		sum += math.Abs(Cost(predict[i], target[i]))
-	}
-	return sum / float64(len(predict))
-}
-
 func Cost(predict, target float64) float64 {
 	return target - predict
 }
@@ -106,7 +98,7 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 		}
 	}
 	for i := 0; i < len(miniBatchTarget); i++ {
-		deltaNablaB, deltaNablaW, err := c.MiniBatchBackProp(miniBatchInput[i], miniBatchTarget[i])
+		deltaNablaB, deltaNablaW, err := c.SingleBackProp(miniBatchInput[i], miniBatchTarget[i])
 		if err != nil {
 			println(err.Error())
 		}
@@ -143,7 +135,7 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 	return nil
 }
 
-func (c *Chain) MiniBatchBackProp(input, target []float64) ([][][]float64, [][][]float64, error) {
+func (c *Chain) SingleBackProp(input, target []float64) ([][][]float64, [][][]float64, error) {
 
 	w := make([][][]float64, len(*c.Layers))
 	b := make([][][]float64, len(*c.Layers))
@@ -202,4 +194,31 @@ func (c *Chain) MiniBatchBackProp(input, target []float64) ([][][]float64, [][][
 		}
 	}
 	return b, w, nil
+}
+
+func Accurate(predict, target []float64) float64 {
+	var sum float64
+	for i := range predict {
+		sum += math.Abs(Cost(predict[i], target[i]))
+	}
+	return sum / float64(len(predict))
+}
+
+func (c *Chain) BatchAccurate(Target [][]float64, sample [][]float64) float64 {
+	var accurate float64
+	if len(Target) != len(sample) {
+		println("Sample rate not the same, Cannot cal Accurate")
+	}
+	var predict []float64 = make([]float64, len(Target[0]))
+
+	for i := 0; i < len(sample); i++ {
+		predict = c.Predict(sample[i][:])
+		accurate += Accurate(predict, Target[i][:])
+	}
+
+	accurate /= float64(len(sample))
+	if accurate > 1 {
+		accurate -= 1
+	}
+	return accurate
 }

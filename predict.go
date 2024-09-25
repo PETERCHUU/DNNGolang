@@ -8,10 +8,24 @@ var (
 	IRnn bool = false
 )
 
-/* predict rnn : return [fc, rnn]
+/*
+	predict rnn : return [fc, rnn]
+
+list of input --> one output
 
 append input with
 */
+func (c Chain) RNNPredict(DataList [][]float64) []float64 {
+
+	if len(DataList) == 0 {
+		panic("Predict input length cannot be 0")
+	}
+	for i := 0; i < len(DataList)-1; i++ {
+		DataList[i+1] = append(DataList[i+1], c.Predict(DataList[i])...)
+	}
+	return c.Predict(DataList[len(DataList)-1])
+
+}
 
 func (c Chain) Predict(data []float64) []float64 {
 	if len(data) == 0 {

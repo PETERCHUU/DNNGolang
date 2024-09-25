@@ -62,6 +62,14 @@ type Chain struct {
 	input  *[][]float64
 }
 
+// Chain is a struct of model
+type RNNChain struct {
+	Cost   func(predict, target float64) float64
+	Layers *[]FCLayer
+	Cache  *[]FCLayer
+	input  *[][]float64
+}
+
 //FCinit(30,16,activation.Sigmoid)
 
 /*
@@ -76,7 +84,10 @@ func NewNetwork() Chain {
 	return Chain{Layers: new([]FCLayer)}
 }
 
+// this layer , next layer, non-linear function, training rate
 func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64) Chain {
+
+	// forward, backward
 	I, O := function.ActivationFunc(f)
 	println("layer init")
 	//println(f)
@@ -103,7 +114,9 @@ func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64)
 
 	// add a layer
 	*c.Layers = append(*c.Layers, FCLayer{LearningRate: rate, Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f})
+
 	return c
+
 }
 
 func (c Chain) RNN() Chain {
@@ -116,7 +129,9 @@ func (c Chain) RNN() Chain {
 	}
 
 	(*c.Layers)[len(*c.Layers)-1].NNtype = RNN
+
 	return c
+
 }
 
 func (c Chain) Copy() Chain {
