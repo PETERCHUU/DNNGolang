@@ -23,7 +23,7 @@ const (
 type MnstSample struct {
 	Label [10]float64  // nn output
 	Image [784]float64 // nn input
-}neron
+}
 
 func main() {
 	const testDataPath = "Mnist/train/t10k-images.idx3-ubyte"
