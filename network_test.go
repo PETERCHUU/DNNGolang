@@ -70,7 +70,6 @@ func TestRNNpredict(t *testing.T) {
 		FCLayer(8, 16, function.Sigmoid, learningRate).FCLayer(16, 2, function.Softmax, learningRate).RNN()
 	twoDArray := make([][]float64, 10)
 	for i := 0; i < len(twoDArray); i++ {
-		println(twoDArray)
 		twoDArray[i] = []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
 	}
 	var tester = nn.RNNPredict(twoDArray)

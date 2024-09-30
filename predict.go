@@ -17,11 +17,8 @@ func (c Chain) RNNPredict(DataList [][]float64) []float64 {
 		panic("Predict input length cannot be 0")
 	}
 	for i := 0; i < len(DataList)-1; i++ {
-		print("printStart with ")
-		println(i)
 
 		output := c.Predict(DataList[i])
-		println(output)
 		DataList[i+1] = append(DataList[i+1], output...)
 	}
 	return c.Predict(DataList[len(DataList)-1])
