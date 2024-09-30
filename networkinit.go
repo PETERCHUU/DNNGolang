@@ -119,19 +119,15 @@ func (c Chain) FCLayer(n int32, next int32, f function.Activation, rate float64)
 }
 
 func (c Chain) RNN() Chain {
-	input := len(*(*c.Layers)[0].Neurons) + len(*(*c.Layers)[len(*c.Layers)-1].Bias)
 
-	weigthLength := len(*(*c.Layers)[0].Bias)
-
-	for i := len(*(*c.Layers)[0].Bias) - 1; i < input; i++ {
-		W := make([]float64, weigthLength)
+	for i := 0; i < len(*(*c.Layers)[len(*c.Layers)-1].Bias); i++ {
+		W := make([]float64, len(*(*c.Layers)[0].Bias))
 		*(*c.Layers)[0].Neurons = append(*(*c.Layers)[0].Neurons, Neuron{Weights: &W})
 	}
 
 	(*c.Layers)[len(*c.Layers)-1].NNtype = RNN
 	println("RNN created")
 	return c
-
 }
 
 func (c Chain) Copy() Chain {

@@ -4,12 +4,8 @@ import (
 	"errors"
 )
 
-var (
-	IRnn bool = false
-)
-
 /*
-	predict rnn : return [fc, rnn]
+predict rnn : return [fc, rnn]
 
 list of input --> one output
 
@@ -48,22 +44,13 @@ func (c Chain) FCPredict(data []float64, index int) []float64 {
 		// doing this as First RNN return
 		panic("Data length is less then neurons")
 	}
-	print("the length of data is ")
-	println(len(data))
+	if len(*(*(*c.Layers)[index].Neurons)[0].Weights) > len(data) {
+		slice2 := make([]float64, len(*(*(*c.Layers)[index].Neurons)[0].Weights)-len(data))
+		data = append(data, slice2...)
+	}
 
 	for _, n := range *(*c.Layers)[index].Neurons {
 		i := 0
-
-		println(data[i])
-		print("the length of ")
-		print(index)
-		print(" bias have ")
-		print(len(*(*c.Layers)[index].Bias))
-		println(" of number of length")
-		println()
-		print("the length of weights is ")
-		print(len(*n.Weights))
-		println(" of index")
 
 		thisData := data[i]
 		data[i] = (*n.Weights)[i] * thisData
