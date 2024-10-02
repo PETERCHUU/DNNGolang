@@ -8,11 +8,6 @@ import (
 
 type NNType int
 
-const (
-	FC NNType = iota
-	RNN
-)
-
 // intresting function for weight
 func BinaryCount(n int) int {
 	count := 0
@@ -45,7 +40,6 @@ type Neuron struct {
 
 // FCLayer is a struct of layer
 type DNN struct {
-	NNtype       NNType
 	LearningRate float64
 	Bias         *[]float64 // len is number of next layer
 	Neurons      *[]Neuron  // len is number of this layer
