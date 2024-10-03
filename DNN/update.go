@@ -10,7 +10,7 @@ type LayerCost struct {
 }
 
 // NextLayerCost function
-func (c *DNN) NextLayerCost(Predicted, target []float64) *LayerCost {
+func (d *DNN) NextLayerCost(Predicted, target []float64) *LayerCost {
 	for i := range target {
 		// target == cost
 		target[i] = cost(Predicted[i], target[i])
@@ -19,18 +19,42 @@ func (c *DNN) NextLayerCost(Predicted, target []float64) *LayerCost {
 }
 
 // Delta function
-func (c *DNN) Delta(DNNCost *LayerCost) {
+func (d *DNN) Delta(DNNCost *LayerCost) {
 
 }
 
 // UpdateCache function
-func (c *DNN) UpdateCache(DNNCost *LayerCost) DNN {
+func (d *DNN) UpdateCache(delta []float64, DNNCost *LayerCost) DNN {
 
 }
 
 // Update function
-func (c *DNN) Update(DNNCost *LayerCost) {
+func (d *DNN) Update(thisPredict []float64, DNNCost *LayerCost) {
+	for i := range thisPredict {
+		thisPredict[i] = thisPredict[i] * DNNCost.Cost[i]
+	}
 
+	cost := DNNCost.Cost
+
+	// loop activation
+	thisPredict = d.Prime(thisPredict)
+
+	for j := range thisPredict {
+
+		//change bias number by delta
+		DNNCost.Cost[j] = DNNCost.Cost[j] * thisPredict[j]
+		(*d.Bias)[j] += DNNCost.Cost[j] * d.LearningRate
+		for k := range thisPredict {
+			(*(*d.Neurons)[k].Weights)[j] += DNNCost.Cost[j] * thisPredict[k] * d.LearningRate
+		}
+	}
+
+	for j := range PredictLayers[i] {
+		target[j] = 0
+		for k := range thisPredict {
+			target[j] += cost[k] * (*(*d.Neurons)[j].Weights)[k] * thisPredict[k]
+		}
+	}
 }
 
 func cost(predict, target float64) float64 {
@@ -38,7 +62,7 @@ func cost(predict, target float64) float64 {
 }
 
 // z=x1y1+x2y2+....B
-func (c *DNN) LayerBackProp(predicted, target []float64, learningRate float64) ([][]float64, [][][]float64, error) {
+func (d *DNN) LayerBackProp(predicted, target []float64, learningRate float64) ([][]float64, [][][]float64, error) {
 
 	if len(target) != len(predicted) || len(predicted) < 1 {
 		return nil, nil, errors.New("dataFormate error, prediction data len != layer number")
