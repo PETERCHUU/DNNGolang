@@ -19,6 +19,30 @@ model.test(testdata)
 
 */
 
+func (c *Chain) Train(input, target []float64, learningRate float64) {
+	// first, getting each layer of prediction
+
+	// then, counting next layer cost from last layer
+
+	// layer loop from last hidden layer to first layer ,
+	// i+1 == next layer , i== this layer
+
+	// 		using next layer cost correcting the next layer prediction??
+
+	//		exposed next layer Prediction
+
+	//		loop next layer Prediction
+
+	//			using next layer cost to correcting exposed next layer
+
+	//			change next layer bias number by corrected exposed next layer
+
+	//			change next layer weight number by this layer prediction and corrected exposed next layer
+
+	// 		count this layer Cost
+
+}
+
 // one target at a time
 func (c *Chain) BackProp(input, target []float64, learningRate float64) ([][]float64, [][][]float64, error) {
 	// get every act in every layer
@@ -31,53 +55,58 @@ func (c *Chain) BackProp(input, target []float64, learningRate float64) ([][]flo
 		return nil, nil, errors.New("dataFormate error, prediction data len != layer number")
 	}
 
-	// change target to be cost from last layer
+	// change target to be next layer cost from last layer
 	for i := range target {
 		target[i] = Cost(PredictLayers[len(PredictLayers)-1][i], target[i]) * 2
 	}
 
-	// layer loop from last hidden layer
+	// layer loop from last hidden layer to first layer ,
+	// i+1 == next layer , i== this layer
 	// 23 - 49 - 784
 	for i := len(PredictLayers) - 2; i > 0; i-- {
 		if len(target) != len(PredictLayers[i+1]) {
 			println("Data len Error")
 		}
+
+		// using next layer cost correcting the next layer prediction??
 		for j := range PredictLayers[i+1] {
 			PredictLayers[i+1][j] = PredictLayers[i+1][j] * target[j]
 		}
 
-		cost := target
-
 		// loop activation
+		//PredictLayers[i+1] == exposed layer
 		PredictLayers[i+1] = (*c.Layers)[i+1].Prime(PredictLayers[i+1])
 		//fmt.Printf("weight: %.3f , \n", (*(*c.Layers)[i+1].Neurons)[0].Weights)
 
 		for j := range PredictLayers[i+1] {
-			//change bias number by delta
-			target[j] = target[j] * PredictLayers[i+1][j]
-			(*(*c.Layers)[i+1].Bias)[j] += target[j] * learningRate
+
+			// using next layer cost to correcting exposed next layer
+			PredictLayers[i+1][j] = target[j] * PredictLayers[i+1][j]
+
+			//change next layer bias number by corrected exposed next layer
+			(*(*c.Layers)[i+1].Bias)[j] += PredictLayers[i+1][j] * learningRate
+
+			//change next layer weight number by this layer prediction and corrected exposed next layer
 			for k := range PredictLayers[i] {
-				(*(*(*c.Layers)[i+1].Neurons)[k].Weights)[j] += target[j] * PredictLayers[i][k] * learningRate
+				(*(*(*c.Layers)[i+1].Neurons)[k].Weights)[j] += PredictLayers[i+1][j] * PredictLayers[i][k] * learningRate
 			}
 		}
 		//fmt.Printf("weight: %.3f\n", (*(*c.Layers)[1].Neurons)[0].Weights)
 
-		target = make([]float64, len(PredictLayers[i]))
+		// count this layer Cost
+		Cost := make([]float64, len(PredictLayers[i]))
 
 		// next layer a loop
 		for j := range PredictLayers[i] {
-			target[j] = 0
 			for k := range PredictLayers[i+1] {
-				target[j] += cost[k] * (*(*(*c.Layers)[i+1].Neurons)[j].Weights)[k] * PredictLayers[i+1][k]
+				Cost[j] += target[k] * (*(*(*c.Layers)[i+1].Neurons)[j].Weights)[k] * PredictLayers[i+1][k]
 			}
 		}
 
+		target = Cost
+
 	}
 	return nil, nil, nil
-}
-
-func (c *Chain) Train(input, target []float64, learningRate float64) {
-	c.BackProp(input, target, learningRate)
 }
 
 func Cost(predict, target float64) float64 {
