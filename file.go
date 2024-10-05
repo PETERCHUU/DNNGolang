@@ -72,10 +72,10 @@ func (c *Chain) writeNetworkInfo(file *os.File, date time.Time) {
 		cost:       0,
 		length:     int32(len(*c.Layers)),
 	}
-	binary.Write(file, binary.NativeEndian, info.version)
-	binary.Write(file, binary.NativeEndian, info.createDate)
-	binary.Write(file, binary.NativeEndian, info.cost)
-	binary.Write(file, binary.NativeEndian, info.length)
+	binary.Write(file, binary.BigEndian, info.version)
+	binary.Write(file, binary.BigEndian, info.createDate)
+	binary.Write(file, binary.BigEndian, info.cost)
+	binary.Write(file, binary.BigEndian, info.length)
 }
 
 func (c *Chain) writeLayerInfo(file *os.File, LayerType int32) {
@@ -122,10 +122,10 @@ func Load(path string) *Chain {
 	}
 	defer file.Close()
 	var info moduleInfo
-	binary.Read(file, binary.NativeEndian, &info.version)
-	binary.Read(file, binary.NativeEndian, &info.createDate)
-	binary.Read(file, binary.NativeEndian, &info.cost)
-	err = binary.Read(file, binary.NativeEndian, &info.length)
+	binary.Read(file, binary.BigEndian, &info.version)
+	binary.Read(file, binary.BigEndian, &info.createDate)
+	binary.Read(file, binary.BigEndian, &info.cost)
+	err = binary.Read(file, binary.BigEndian, &info.length)
 	if err != nil {
 		println(err.Error())
 	}
@@ -182,23 +182,34 @@ func readFile(file *os.File, length int32, cost float64) *Chain {
 	return &Chain
 }
 
-func writeBin(file *os.File, field interface{}) {
+func WriteBin(file *os.File, field interface{}) {
 	value := reflect.ValueOf(field)
 	switch value.Kind() {
 	case reflect.Struct:
-		// loop and write bin
+		// Loop and write each field
 		for i := 0; i < value.NumField(); i++ {
-			binary.Write(file, binary.BigEndian, value.Field(i))
+			field := value.Field(i)
+			if field.CanInterface() {
+				binary.Write(file, binary.BigEndian, field.Interface())
+			}
 		}
-	case reflect.Array:
-		fallthrough
+	case reflect.Array, reflect.Slice:
+		for i := 0; i < value.Len(); i++ {
+			elem := value.Index(i)
+			if elem.CanInterface() {
+				binary.Write(file, binary.BigEndian, elem.Interface())
+			}
+		}
 	case reflect.Ptr:
-		fallthrough
-	case reflect.Slice:
-		for i := 0; i < value.Elem().Len(); i++ {
-			binary.Write(file, binary.BigEndian, value.Field(i))
+		if !value.IsNil() {
+			elem := value.Elem()
+			if elem.CanInterface() {
+				binary.Write(file, binary.BigEndian, elem.Interface())
+			}
 		}
 	default:
-		binary.Write(file, binary.BigEndian, value)
+		if value.CanInterface() {
+			binary.Write(file, binary.BigEndian, value.Interface())
+		}
 	}
 }
