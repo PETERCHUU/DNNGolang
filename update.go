@@ -45,7 +45,7 @@ func (c *Chain) Train(input, target []float64, learningRate float64) {
 		// }
 
 		//	exposed next layer Prediction
-		// func(l *layer) Prime(Predicted []float64)  []float64
+		// func(l *layer) Exposed(Predicted []float64) []float64
 		PredictData[i+1] = (*c.Layers)[i+1].Prime(PredictData[i+1])
 
 		//	loop next layer Prediction

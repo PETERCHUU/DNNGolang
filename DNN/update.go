@@ -4,55 +4,53 @@ package dnn
 
 // next is the backward n-1
 
-type LayerCost struct {
+type Cost struct {
 	Cost []float64
 }
 
 // Cost function for cost in layer model+1
-func (d *DNN) Cost(target, Predicted []float64) *LayerCost {
+func (d *DNN) Cost(target, Predicted []float64) []float64 {
 	for i := range target {
 		// target == cost
 		target[i] = cost(Predicted[i], target[i])
 	}
-	return &LayerCost{Cost: target}
+	return target
 }
 
 // NextCost function :
-func (d *DNN) NextCost(DNNCost *LayerCost, Predicted []float64, NextLayerLen int) {
-	target := make([]float64, NextLayerLen)
+func (d *DNN) Delta(nextDelta, NextPredict []float64, ThisPredictLen int) []float64 {
+	target := make([]float64, ThisPredictLen)
 	// next layer a loop
-	for j := 0; j < NextLayerLen; j++ {
+	for j := 0; j < ThisPredictLen; j++ {
 		target[j] = 0
-		for k := range Predicted {
-			target[j] += DNNCost.Cost[k] * (*(*d.Neurons)[j].Weights)[k] * Predicted[k]
+		for k := range NextPredict {
+			target[j] += nextDelta[k] * (*(*d.Neurons)[j].Weights)[k] * NextPredict[k]
 		}
 	}
-	DNNCost.Cost = target
+	return target
+}
+
+func (d *DNN) Exposed(Predicted []float64) []float64 {
+	return d.Prime(Predicted)
 }
 
 // UpdateCache function
-func (d *DNN) UpdateCache(delta []float64, DNNCost *LayerCost) DNN {
+func (d *DNN) UpdateCache(delta []float64, DNNCost []float64) DNN {
 	return DNN{}
 }
 
 // Update function
-func (d *DNN) Update(thisPredict []float64, DNNCost *LayerCost) {
-	for i := range thisPredict {
-		thisPredict[i] = thisPredict[i] * DNNCost.Cost[i]
-	}
+func (d *DNN) Update(thisPredict, ExposedNextPredict, Delta []float64) {
 
-	// loop activation
-	thisPredict = d.Prime(thisPredict)
-
-	for j := range thisPredict {
+	for j := range ExposedNextPredict {
 
 		//change bias number by cost
-		DNNCost.Cost[j] = DNNCost.Cost[j] * thisPredict[j]
-		(*d.Bias)[j] += DNNCost.Cost[j] * d.LearningRate
+		Delta[j] = Delta[j] * ExposedNextPredict[j]
+		(*d.Bias)[j] += Delta[j] * d.LearningRate
 
 		// change each weight by cost
 		for k := range thisPredict {
-			(*(*d.Neurons)[k].Weights)[j] += DNNCost.Cost[j] * thisPredict[k] * d.LearningRate
+			(*(*d.Neurons)[k].Weights)[j] += Delta[j] * thisPredict[k] * d.LearningRate
 		}
 	}
 
