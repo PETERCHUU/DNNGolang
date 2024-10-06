@@ -1,6 +1,6 @@
 package dnn
 
-func (d DNN) Predict(data []float64, index int) []float64 {
+func (d DNN) Predict(data []float64) []float64 {
 	if len(data) > len(*d.Neurons) {
 		// doing this as First RNN return
 		panic("Data length is less then neurons")

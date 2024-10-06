@@ -13,10 +13,6 @@ const (
 	RNN
 )
 
-type Layer interface {
-	Predict(data []float64, index int) []float64
-}
-
 // intresting function for weight
 func BinaryCount(n int) int {
 	count := 0
