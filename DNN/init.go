@@ -3,6 +3,7 @@ package dnn
 import (
 	"math/rand"
 
+	"github.com/PETERCHUU/DNNGolang"
 	"github.com/PETERCHUU/DNNGolang/function"
 )
 
@@ -59,23 +60,20 @@ the len(model):=[16,8,4]
 */
 
 // this layer , next layer, non-linear function, training rate
-func NewLayer(n int32, next int32, f function.Activation, rate float64) DNN {
+func NewLayer(n int32, nextN int32, activation DNNGolang.Activation, prime DNNGolang.Prime, rate float64) DNNGolang.Layer {
 
-	// forward, backward
-	I, O := function.ActivationFunc(f)
 	println("layer init")
 	//println(f)
 	L := make([]Neuron, n)
-	B := make([]float64, next)
+	B := make([]float64, nextN)
 
 	for i := 0; i < int(n); i++ {
-		W := make([]float64, next)
+		W := make([]float64, nextN)
 		L[i] = Neuron{Weights: &W}
 	}
 
 	// add a layer
-	return DNN{LearningRate: rate, Neurons: &L, Activation: I, Prime: O, Bias: &B, ActivateEnum: f}
-
+	return DNN{LearningRate: rate, Neurons: &L, Activation: activation, Prime: prime, Bias: &B}
 }
 
 func (d *DNN) Copy() *DNN {
@@ -92,6 +90,15 @@ func (d *DNN) Copy() *DNN {
 		N[j] = Neuron{Weights: &W}
 	}
 	return &DNN{LearningRate: d.LearningRate, Neurons: &N, Activation: d.Activation, Prime: d.Prime, Bias: &B, ActivateEnum: d.ActivateEnum}
+}
+
+func (d *DNN) EmptyLayer() (nd DNN) {
+	*nd.Bias = make([]float64, len(*d.Bias))
+	*nd.Neurons = make([]Neuron, len(*d.Neurons))
+	for i := range *nd.Neurons {
+		*(*nd.Neurons)[i].Weights = make([]float64, len(*(*d.Neurons)[i].Weights))
+	}
+	return
 }
 
 func (d *DNN) Random() {
