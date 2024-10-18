@@ -106,11 +106,15 @@ func (m Module) BatchTrain(miniBatchInput, miniBatchTarget [][]float64, sampleRa
 	var PredictBatchData [][][]float64
 	PredictBatchData = make([][][]float64, sampleRate)
 
-	for i := 0; i < len(miniBatchInput); i += sampleRate {
-		lastNum := i + sampleRate
-		if lastNum > len(miniBatchInput) {
-			lastNum = len(miniBatchInput)
+	var start, end int
+	for i := 0; i <= updateLoopLength; i++ {
+		start = sampleRate * i
+		if i == updateLoopLength {
+			end = sampleRate*i + len(miniBatchInput)%sampleRate - 1
+		} else {
+			end = start + sampleRate
 		}
+
 		var PredictData [][]float64
 		PredictData = make([][]float64, lastNum-i)
 		for j := 0; j < (lastNum - i); j++ {
