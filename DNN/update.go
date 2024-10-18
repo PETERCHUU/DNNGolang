@@ -9,7 +9,7 @@ type Cost struct {
 }
 
 // Cost function for cost in layer model+1
-func (d DNN) Cost(target, Predicted []float64) []float64 {
+func (d *DNN) Cost(target, Predicted []float64) []float64 {
 	for i := range target {
 		// target == cost
 		target[i] = cost(Predicted[i], target[i])
@@ -18,24 +18,24 @@ func (d DNN) Cost(target, Predicted []float64) []float64 {
 }
 
 // NextCost function :
-func (d DNN) Delta(nextDelta, NextPredict []float64, ThisPredictLen int) []float64 {
+func (d *DNN) Delta(nextDelta, NextPredict []float64, ThisPredictLen int) []float64 {
 	target := make([]float64, ThisPredictLen)
 	// next layer a loop
 	for j := 0; j < ThisPredictLen; j++ {
 		target[j] = 0
 		for k := range NextPredict {
-			target[j] += nextDelta[k] * (*(*d.Neurons)[j].Weights)[k] * NextPredict[k]
+			target[j] += nextDelta[k] * (*d.Neurons)[j][k] * NextPredict[k]
 		}
 	}
 	return target
 }
 
-func (d DNN) Exposed(Predicted []float64) []float64 {
+func (d *DNN) Exposed(Predicted []float64) []float64 {
 	return d.Prime(Predicted)
 }
 
 // Update function
-func (d DNN) Update(thisPredict, ExposedNextPredict, Delta []float64) {
+func (d *DNN) Update(thisPredict, ExposedNextPredict, Delta []float64) {
 
 	for j := range ExposedNextPredict {
 
@@ -45,14 +45,14 @@ func (d DNN) Update(thisPredict, ExposedNextPredict, Delta []float64) {
 
 		// change each weight by cost
 		for k := range thisPredict {
-			(*(*d.Neurons)[k].Weights)[j] += Delta[j] * thisPredict[k] * d.LearningRate
+			(*d.Neurons)[k][j] += Delta[j] * thisPredict[k] * d.LearningRate
 		}
 	}
 
 }
 
 // UpdateCache function
-func (d DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) (nd DNN) {
+func (d *DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) (nd DNN) {
 
 	for i := range ExposedNextPredict {
 
@@ -62,7 +62,7 @@ func (d DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) (nd D
 
 		// change each weight by cost
 		for j := range thisPredict {
-			(*(*nd.Neurons)[j].Weights)[i] += Delta[i] * thisPredict[j] * d.LearningRate
+			(*nd.Neurons)[j][i] += Delta[i] * thisPredict[j] * d.LearningRate
 		}
 	}
 

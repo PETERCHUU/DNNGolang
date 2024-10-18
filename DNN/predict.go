@@ -1,12 +1,12 @@
 package dnn
 
-func (d DNN) Predict(input []float64) []float64 {
+func (d *DNN) Predict(input []float64) []float64 {
 	if len(input) > len(*d.Neurons) {
 		// doing this as First RNN return
 		panic("Data length is less then neurons")
 	}
-	if len(*(*d.Neurons)[0].Weights) > len(input) {
-		slice2 := make([]float64, len(*(*d.Neurons)[0].Weights)-len(input))
+	if len((*d.Neurons)[0]) > len(input) {
+		slice2 := make([]float64, len((*d.Neurons)[0])-len(input))
 		input = append(input, slice2...)
 	}
 
@@ -14,11 +14,11 @@ func (d DNN) Predict(input []float64) []float64 {
 		i := 0
 
 		thisData := input[i]
-		input[i] = (*n.Weights)[i] * thisData
+		input[i] = n[i] * thisData
 		i++
 
 		for i < len(*d.Bias) {
-			input[i] += (*n.Weights)[i] * thisData
+			input[i] += n[i] * thisData
 			i++
 		}
 	}

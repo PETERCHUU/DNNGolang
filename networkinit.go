@@ -62,6 +62,7 @@ type Chain struct {
 	input  *[][]float64
 }
 
+
 //FCinit(30,16,activation.Sigmoid)
 
 /*
