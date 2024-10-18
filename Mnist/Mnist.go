@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/PETERCHUU/Golang_NN"
-	dnn "github.com/PETERCHUU/Golang_NN/DNN"
 	"github.com/PETERCHUU/Golang_NN/function"
 )
 
@@ -39,13 +38,14 @@ func main() {
 	fmt.Printf("Accurate using output Module: %.4f\n", CalculateAccurate(newModule, tester))
 }
 
-func RunInterface() Golang_NN.Module {
-	module := Golang_NN.NewModel().Add(dnn.NewLayer(784, 49, function.SigmoidIn, function.SigmoidOut, learningRate)).Add(dnn.NewLayer(49, 10, function.SoftmaxIn, function.SoftmaxOut, learningRate))
-	betterModule := module.Copy()
-	var accurate float64
-	sample := InitSample(trainingDataPath, trainingLabelPath)
-	tester := InitSample(testDataPath, testLabelPath)
-}
+// crating unit test for interface, the result should be the same
+// func RunInterface() Golang_NN.Module {
+// 	module := Golang_NN.NewModel().Add(dnn.NewLayer(784, 49, function.SigmoidIn, function.SigmoidOut, learningRate)).Add(dnn.NewLayer(49, 10, function.SoftmaxIn, function.SoftmaxOut, learningRate))
+// 	betterModule := module.Copy()
+// 	var accurate float64
+// 	sample := InitSample(trainingDataPath, trainingLabelPath)
+// 	tester := InitSample(testDataPath, testLabelPath)
+// }
 
 func Run() Golang_NN.Chain {
 	module := Golang_NN.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).

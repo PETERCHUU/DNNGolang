@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 )
@@ -48,6 +49,16 @@ func (m Module) Predict(input []float64) []float64 {
 	}
 	return input
 }
+
+func (m Module) Accurate(input, target []float64) float64 {
+	var sum float64
+	predict := m.Predict(input)
+	for i := range predict {
+		sum += math.Abs(Cost(predict[i], target[i]))
+	}
+	return sum / float64(len(predict))
+}
+
 func (m Module) Copy() Module {
 	w := m
 	return w
@@ -89,6 +100,32 @@ func (m Module) BatchTrain(miniBatchInput, miniBatchTarget [][]float64, sampleRa
 	if len(miniBatchInput) != len(miniBatchTarget) {
 		return errors.New("dataFormate error, input len != target len")
 	}
+	updateLoopLength := len(miniBatchInput) / sampleRate
+
+	// SampleRate:LayerOfPredict:PredictResult
+	var PredictBatchData [][][]float64
+	PredictBatchData = make([][][]float64, sampleRate)
+
+	for i := 0; i < len(miniBatchInput); i += sampleRate {
+		lastNum := i + sampleRate
+		if lastNum > len(miniBatchInput) {
+			lastNum = len(miniBatchInput)
+		}
+		var PredictData [][]float64
+		PredictData = make([][]float64, lastNum-i)
+		for j := 0; j < (lastNum - i); j++ {
+			for k := 0; k < (lastNum - i); i++ {
+				// PredictData[j] = append(PredictData[j], m.Layers[k].BatchPredict(miniBatchInput[i:lastNum]))
+			}
+		}
+
+		NewModule := m
+		for j := 0; j < len(m.Layers); j++ {
+			// miniBatchInput[i:lastNum],NewModule.layers[i] = m.layers[j].batchUpdate(miniBatchInput[i:lastNum],miniBatchTarget[i:lastNum])
+		}
+
+	}
+	// newlayer := m.layers[i].batchUpdate(miniBatchInput, miniBatchTarget )
 }
 
 func (m Module) Save(modulePath string) error {

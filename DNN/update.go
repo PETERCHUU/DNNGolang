@@ -70,7 +70,6 @@ func (d *DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) Gola
 	}
 
 	return nd
-
 }
 
 func cost(predict, target float64) float64 {

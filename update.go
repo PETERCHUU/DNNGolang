@@ -89,12 +89,15 @@ func Cost(predict, target float64) float64 {
 	return (target - predict) * 2
 }
 
+// 
+
 func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sampleRate int, LearningRate float64) error {
 	if len(miniBatchInput) != len(miniBatchTarget) {
 		return errors.New("dataFormate error, input len != target len")
 	}
 	nablaB := make([][]float64, len(*c.Layers))
 	nablaW := make([][][]float64, len(*c.Layers))
+
 	for i := range *c.Layers {
 		nablaB[i] = make([]float64, len(*(*c.Layers)[i].Bias))
 		nablaW[i] = make([][]float64, len((*(*c.Layers)[i].Neurons)))
@@ -102,6 +105,7 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 			nablaW[i][j] = make([]float64, len(*(*(*c.Layers)[i].Neurons)[j].Weights))
 		}
 	}
+
 	for i := 0; i < len(miniBatchTarget); i++ {
 		deltaNablaB, deltaNablaW, err := c.SingleBackProp(miniBatchInput[i], miniBatchTarget[i])
 		if err != nil {
@@ -119,7 +123,6 @@ func (c *Chain) UpdateMiniBatch(miniBatchInput, miniBatchTarget [][]float64, sam
 			for j := range nablaW[k] {
 				for h := range nablaW[k][j] {
 					nablaW[k][j][h] += deltaNablaW[k][j][h]
-
 				}
 			}
 		}
