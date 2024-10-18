@@ -1,4 +1,4 @@
-package DNNGolang
+package Golang_NN
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/PETERCHUU/DNNGolang/function"
+	"github.com/PETERCHUU/Golang_NN/function"
 )
 
 const (

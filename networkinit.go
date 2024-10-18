@@ -1,9 +1,9 @@
-package DNNGolang
+package Golang_NN
 
 import (
 	"math/rand"
 
-	"github.com/PETERCHUU/DNNGolang/function"
+	"github.com/PETERCHUU/Golang_NN/function"
 )
 
 type NNType int
@@ -61,7 +61,6 @@ type Chain struct {
 	Cache  *[]FCLayer
 	input  *[][]float64
 }
-
 
 //FCinit(30,16,activation.Sigmoid)
 

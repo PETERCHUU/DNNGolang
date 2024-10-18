@@ -1,17 +1,17 @@
-package DNNGolang_test
+package Golang_NN_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/PETERCHUU/DNNGolang"
-	"github.com/PETERCHUU/DNNGolang/function"
+	"github.com/PETERCHUU/Golang_NN"
+	"github.com/PETERCHUU/Golang_NN/function"
 )
 
 const learningRate = 0.1
 
 func TestNewNetwork(T *testing.T) {
-	FCnetwork := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
+	FCnetwork := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
 
 	for i, v := range *FCnetwork.Layers {
@@ -27,7 +27,7 @@ func TestNewNetwork(T *testing.T) {
 }
 
 func BenchmarkNewNetwork(T *testing.B) {
-	FCnetwork := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
+	FCnetwork := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
 	for i, v := range *FCnetwork.Layers {
 		for j, n := range *v.Neurons {
@@ -42,20 +42,20 @@ func BenchmarkNewNetwork(T *testing.B) {
 }
 
 func TestFCLayer(t *testing.T) {
-	nn := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate)
+	nn := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate)
 	println(len(*nn.Layers))
 	t.Log("haha")
 }
 
 func TestRNN(t *testing.T) {
-	nn := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).RNN()
+	nn := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).RNN()
 	println(len(*nn.Layers))
 	t.Log("RNN created")
 
 }
 
 func TestPredict(t *testing.T) {
-	FCnetwork := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
+	FCnetwork := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
 	data := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	output := FCnetwork.Predict(data)
@@ -66,7 +66,7 @@ func TestPredict(t *testing.T) {
 }
 
 func TestRNNpredict(t *testing.T) {
-	nn := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
+	nn := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 16, function.Sigmoid, learningRate).FCLayer(16, 2, function.Softmax, learningRate).RNN()
 	twoDArray := make([][]float64, 10)
 	for i := 0; i < len(twoDArray); i++ {
@@ -78,7 +78,7 @@ func TestRNNpredict(t *testing.T) {
 }
 
 func BenchmarkPredict(t *testing.B) {
-	FCnetwork := DNNGolang.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
+	FCnetwork := Golang_NN.NewNetwork().FCLayer(16, 8, function.Sigmoid, learningRate).
 		FCLayer(8, 4, function.Sigmoid, learningRate).FCLayer(4, 1, function.Softmax, learningRate)
 	data := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	output := FCnetwork.Predict(data)

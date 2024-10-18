@@ -6,8 +6,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/PETERCHUU/DNNGolang"
-	"github.com/PETERCHUU/DNNGolang/function"
+	"github.com/PETERCHUU/Golang_NN"
+	dnn "github.com/PETERCHUU/Golang_NN/DNN"
+	"github.com/PETERCHUU/Golang_NN/function"
 )
 
 const (
@@ -33,13 +34,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	newModule := DNNGolang.Load(filename)
+	newModule := Golang_NN.Load(filename)
 	tester := InitSample(testDataPath, testLabelPath)
 	fmt.Printf("Accurate using output Module: %.4f\n", CalculateAccurate(newModule, tester))
 }
 
-func Run() DNNGolang.Chain {
-	module := DNNGolang.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
+func RunInterface() Golang_NN.Module {
+	module := Golang_NN.NewModel().Add(dnn.NewLayer(784, 49, function.SigmoidIn, function.SigmoidOut, learningRate)).Add(dnn.NewLayer(49, 10, function.SoftmaxIn, function.SoftmaxOut, learningRate))
+	betterModule := module.Copy()
+	var accurate float64
+	sample := InitSample(trainingDataPath, trainingLabelPath)
+	tester := InitSample(testDataPath, testLabelPath)
+}
+
+func Run() Golang_NN.Chain {
+	module := Golang_NN.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).
 		FCLayer(49, 10, function.Softmax, learningRate)
 	betterModule := module.Copy()
 	var accurate float64
@@ -164,11 +173,11 @@ func InitSample(imageFilePath, LabelFilePath string) []MnstSample {
 	return Sample
 }
 
-func CalculateAccurate(module *DNNGolang.Chain, sample []MnstSample) float64 {
+func CalculateAccurate(module *Golang_NN.Chain, sample []MnstSample) float64 {
 	var accurate float64
 	for _, v := range sample {
 		predict := module.Predict(v.Image[:])
-		accurate += DNNGolang.Accurate(predict, v.Label[:])
+		accurate += Golang_NN.Accurate(predict, v.Label[:])
 	}
 
 	accurate /= float64(len(sample))

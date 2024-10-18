@@ -1,4 +1,4 @@
-package DNNGolang
+package Golang_NN
 
 import (
 	"errors"

@@ -3,15 +3,15 @@ package main
 import (
 	"math/rand"
 
-	"github.com/PETERCHUU/DNNGolang"
-	"github.com/PETERCHUU/DNNGolang/function"
+	"github.com/PETERCHUU/Golang_NN"
+	"github.com/PETERCHUU/Golang_NN/function"
 )
 
 const learningRate float64 = 0.15
 
 func main() {
 	//making a 700 floating point input , 1 layer of hidden with 50 plating point, and final 10 point of output
-	module := DNNGolang.NewNetwork().FCLayer(700, 50, function.Sigmoid, learningRate).
+	module := Golang_NN.NewNetwork().FCLayer(700, 50, function.Sigmoid, learningRate).
 		FCLayer(50, 10, function.Softmax, learningRate)
 
 	// get a 700 length 2D array for input use

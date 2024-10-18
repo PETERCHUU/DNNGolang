@@ -1,5 +1,7 @@
 package dnn
 
+import "github.com/PETERCHUU/Golang_NN"
+
 // in this file, all thing go backward,
 
 // next is the backward n-1
@@ -52,8 +54,9 @@ func (d *DNN) Update(thisPredict, ExposedNextPredict, Delta []float64) {
 }
 
 // UpdateCache function
-func (d *DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) (nd DNN) {
+func (d *DNN) UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) Golang_NN.Layer {
 
+	nd := d
 	for i := range ExposedNextPredict {
 
 		//change bias number by cost

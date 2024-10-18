@@ -1,8 +1,9 @@
-package DNNGolang
+package Golang_NN
 
 import (
 	"bufio"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,6 +24,7 @@ type Layer interface {
 	Exposed(Predicted []float64) []float64
 	Update(thisPredict, ExposedNextPredict, Delta []float64)
 	Delta(nextDelta, NextPredict []float64, ThisPredictLen int) []float64
+	UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) Layer
 }
 
 type Module struct {
@@ -45,6 +47,10 @@ func (m Module) Predict(input []float64) []float64 {
 		input = m.Layers[i].Predict(input)
 	}
 	return input
+}
+func (m Module) Copy() Module {
+	w := m
+	return w
 }
 
 func (m Module) Train(input, output []float64, learningRate float64) {
@@ -77,6 +83,11 @@ func (m Module) Train(input, output []float64, learningRate float64) {
 		// 	count this layer Cost
 		//	func(l *layer) BackPropDelta (NextPredict []float64 , ThisPredictLen int) []float64
 		delta = m.Layers[i].Delta(delta, PredictData[i+1], len(PredictData[i]))
+	}
+}
+func (m Module) BatchTrain(miniBatchInput, miniBatchTarget [][]float64, sampleRate int, LearningRate float64) error {
+	if len(miniBatchInput) != len(miniBatchTarget) {
+		return errors.New("dataFormate error, input len != target len")
 	}
 }
 

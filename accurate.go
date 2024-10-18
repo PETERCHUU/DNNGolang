@@ -1,4 +1,4 @@
-package DNNGolang
+package Golang_NN
 
 func (c Chain) calculateAccurate(inputs, targets [][]float64) float64 {
 	var accurate float64

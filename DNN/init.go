@@ -3,7 +3,7 @@ package dnn
 import (
 	"math/rand"
 
-	"github.com/PETERCHUU/DNNGolang"
+	"github.com/PETERCHUU/Golang_NN"
 )
 
 type NNType int
@@ -19,7 +19,7 @@ type DNN struct {
 }
 
 // this layer , next layer, non-linear function, training rate
-func NewLayer(n int32, nextN int32, activation DNNGolang.Activation, prime DNNGolang.Prime, rate float64) DNNGolang.Layer {
+func NewLayer(n int32, nextN int32, activation Golang_NN.Activation, prime Golang_NN.Prime, rate float64) Golang_NN.Layer {
 
 	println("layer init")
 	//println(f)
