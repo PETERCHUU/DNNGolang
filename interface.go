@@ -14,10 +14,6 @@ type Prime func(x []float64) []float64
 
 // this interface should return pointer of a struct
 type Layer interface {
-	// create RNN
-	Append(input int)
-	AddRNN()
-	IsRNN() bool
 
 	// forward prediction
 	Predict(input []float64) []float64
@@ -42,13 +38,6 @@ func NewModel() Module {
 func (m Module) Add(layer Layer) Module {
 	m.Layers = append(m.Layers, layer)
 	return m
-}
-
-// this function should use after init last layer
-func (m Module) Recur(outputLength int) {
-	m.Layers[0].AddRNN()
-	m.Layers[len(m.Layers)-1].AddRNN()
-	m.Layers[len(m.Layers)-1].Append(outputLength)
 }
 
 func (m Module) Predict(input []float64) []float64 {
