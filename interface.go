@@ -24,8 +24,10 @@ type Layer interface {
 	Cost(target, Predicted []float64) []float64
 	Exposed(Predicted []float64) []float64
 	Update(thisPredict, ExposedNextPredict, Delta []float64)
-	Delta(nextDelta, NextPredict []float64, ThisPredictLen int) []float64
-	UpdateCache(thisPredict, ExposedNextPredict, Delta []float64) Layer
+	Delta(nextDelta, ExposedNextPredict []float64, ThisPredictLen int) []float64
+
+	// for batch prediction
+	UpdateCache(od Layer, thisPredict, ExposedNextPredict, Delta []float64)
 }
 
 type Module struct {
@@ -38,6 +40,7 @@ type Module struct {
 func NewModel() Module {
 	return Module{Layers: []Layer{}}
 }
+
 func (m Module) Add(layer Layer) Module {
 	m.Layers = append(m.Layers, layer)
 	return m
@@ -64,13 +67,12 @@ func (m Module) Copy() Module {
 	return w
 }
 
-func (m Module) Train(input, output []float64, learningRate float64) {
+func (m Module) Train(input, output []float64) {
 	// first, getting each layer of prediction
-	var PredictData [][]float64
-	PredictData = append(PredictData, input)
-	for i := 0; i < len(m.Layers); i++ {
-		// func(l *layer) predict(input []float64) []float64
-		PredictData = append(PredictData, m.Layers[i].Predict(PredictData[i]))
+	var PredictData [][]float64 = make([][]float64, len(m.Layers)+1)
+	PredictData[0] = input
+	for i := 1; i <= len(m.Layers); i++ {
+		PredictData[i] = m.Layers[i].Predict(PredictData[i-1])
 	}
 
 	// then, counting the root delta by Target Output
@@ -92,44 +94,77 @@ func (m Module) Train(input, output []float64, learningRate float64) {
 		m.Layers[i+1].Update(PredictData[i], PredictData[i+1], delta)
 
 		// 	count this layer Cost
-		//	func(l *layer) BackPropDelta (NextPredict []float64 , ThisPredictLen int) []float64
 		delta = m.Layers[i].Delta(delta, PredictData[i+1], len(PredictData[i]))
 	}
 }
-func (m Module) BatchTrain(miniBatchInput, miniBatchTarget [][]float64, sampleRate int, LearningRate float64) error {
+
+func (m Module) batchUpdate(miniBatchInput, miniBatchTarget [][]float64, sampleRate int) error {
+	// pre making all PredictData for all layer by sample rate
+	// predictData[layer][sample rate][data]
+
 	if len(miniBatchInput) != len(miniBatchTarget) {
 		return errors.New("dataFormate error, input len != target len")
 	}
 	updateLoopLength := len(miniBatchInput) / sampleRate
 
-	// SampleRate:LayerOfPredict:PredictResult
-	var PredictBatchData [][][]float64
-	PredictBatchData = make([][][]float64, sampleRate)
+	// first version, need to implement the speed by this after
+	//var BigBlock []float64 = make([]float64, len(m.Layers)*3*sampleRate)
+	//var predictBlock []float64 = BigBlock[:len(m.Layers)*sampleRate]
+
+	var PredictData [][][]float64 = make([][][]float64, len(m.Layers))
+
+	var ExposedData [][][]float64 = make([][][]float64, len(m.Layers))
+
+	var delta [][][]float64 = make([][][]float64, len(m.Layers))
+
+	for i := range m.Layers {
+		PredictData[i] = make([][]float64, sampleRate)
+		delta[i] = make([][]float64, sampleRate)
+		ExposedData[i] = make([][]float64, sampleRate)
+	}
 
 	var start, end int
+
+	// loop by sample rate
 	for i := 0; i <= updateLoopLength; i++ {
+
 		start = sampleRate * i
 		if i == updateLoopLength {
 			end = sampleRate*i + len(miniBatchInput)%sampleRate - 1
+			if start == end {
+				break
+			}
 		} else {
 			end = start + sampleRate
 		}
+		thisBatchTarget := miniBatchTarget[start:end]
 
-		var PredictData [][]float64
-		PredictData = make([][]float64, lastNum-i)
-		for j := 0; j < (lastNum - i); j++ {
-			for k := 0; k < (lastNum - i); i++ {
-				// PredictData[j] = append(PredictData[j], m.Layers[k].BatchPredict(miniBatchInput[i:lastNum]))
+		PredictData[0] = miniBatchInput[start:end]
+
+		// batch predict
+		for k := 0; k < sampleRate; k++ {
+			delta[len(m.Layers)-1][k] = m.Layers[len(m.Layers)-1].Cost(thisBatchTarget[k], PredictData[0][k])
+			for j := 0; j < len(m.Layers); j++ {
+				// PredictData [input -- layer end]
+				PredictData[j+1][k] = m.Layers[j].Predict(PredictData[j][k])
+				// ExposedData [1st predict -- output]
+				ExposedData[j][k] = m.Layers[j].Exposed(PredictData[j+1][k])
 			}
+			for j := len(m.Layers); j > 0; j-- {
+				// delta []
+				delta[j][k] = m.Layers[j].Delta()
+			}
+
 		}
 
-		NewModule := m
-		for j := 0; j < len(m.Layers); j++ {
-			// miniBatchInput[i:lastNum],NewModule.layers[i] = m.layers[j].batchUpdate(miniBatchInput[i:lastNum],miniBatchTarget[i:lastNum])
-		}
+		// target function
+		// ExposedData is nextPredict , PredictData is this Predict
+		// m.Layers[j].BatchUpdate(PredictData[j], ExposedData[j], delta[j])
+		// batch update the layer by sample rate
 
 	}
-	// newlayer := m.layers[i].batchUpdate(miniBatchInput, miniBatchTarget )
+	return nil
+
 }
 
 func (m Module) Save(modulePath string) error {
