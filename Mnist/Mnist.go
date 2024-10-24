@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/PETERCHUU/Golang_NN"
+	dnn "github.com/PETERCHUU/Golang_NN/DNN"
 	"github.com/PETERCHUU/Golang_NN/function"
 )
 
@@ -39,13 +40,45 @@ func main() {
 }
 
 // crating unit test for interface, the result should be the same
-// func RunInterface() Golang_NN.Module {
-// 	module := Golang_NN.NewModel().Add(dnn.NewLayer(784, 49, function.SigmoidIn, function.SigmoidOut, learningRate)).Add(dnn.NewLayer(49, 10, function.SoftmaxIn, function.SoftmaxOut, learningRate))
-// 	betterModule := module.Copy()
-// 	var accurate float64
-// 	sample := InitSample(trainingDataPath, trainingLabelPath)
-// 	tester := InitSample(testDataPath, testLabelPath)
-// }
+func RunInterface() Golang_NN.Module {
+	module := Golang_NN.NewModel().Add(dnn.NewLayer(784, 49, function.SigmoidIn, function.SigmoidOut, learningRate)).Add(dnn.NewLayer(49, 10, function.SoftmaxIn, function.SoftmaxOut, learningRate))
+	betterModule := module.Copy()
+	var accurate float64
+	sample := InitSample(trainingDataPath, trainingLabelPath)
+	tester := InitSample(testDataPath, testLabelPath)
+	fmt.Printf("Accurate before train: %.2f\n", CalculateAccurate(&module, tester))
+
+	for i := 0; i < len(sample); i += sampleRate {
+		sampleInput := make([][]float64, sampleRate)
+		sampleTarget := make([][]float64, sampleRate)
+		for j := 0; j < sampleRate; j++ {
+			sampleInput[j] = sample[i+j].Image[:]
+			sampleTarget[j] = sample[i+j].Label[:]
+		}
+
+		module.UpdateMiniBatch(sampleInput, sampleTarget, sampleRate, learningRate)
+		thisAccurate := CalculateAccurate(&module, tester)
+		if thisAccurate > accurate {
+			accurate = thisAccurate
+			betterModule = module.Copy()
+		}
+		fmt.Printf("Accurate after %d train: %.4f\n", i, thisAccurate)
+	}
+}
+
+func CalculateInterfaceAccurate(module *Golang_NN.Module, sample []MnstSample) float64 {
+	var accurate float64
+	for _, v := range sample {
+		predict := module.Predict(v.Image[:])
+		accurate += Golang_NN.Accurate(predict, v.Label[:])
+	}
+
+	accurate /= float64(len(sample))
+	if accurate > 1 {
+		accurate -= 1
+	}
+	return accurate
+}
 
 func Run() Golang_NN.Chain {
 	module := Golang_NN.NewNetwork().FCLayer(784, 49, function.Sigmoid, learningRate).

@@ -22,12 +22,12 @@ type Layer interface {
 
 	// for backward prediction
 	Cost(target, Predicted []float64) []float64
-	Exposed(Predicted []float64) []float64
+	Exposed(thisPredicted []float64) []float64
 	Update(thisPredict, ExposedNextPredict, Delta []float64)
 	Delta(nextDelta, ExposedNextPredict []float64, ThisPredictLen int) []float64
 
 	// for batch prediction
-	UpdateCache(od Layer, thisPredict, ExposedNextPredict, Delta []float64)
+	UpdateCache(thisPredict, ExposedNextPredict, Delta [][]float64)
 }
 
 type Module struct {
@@ -87,7 +87,7 @@ func (m Module) Train(input, output []float64) {
 		// 	PredictData[i+1][j] = PredictData[i+1][j] * target[j]
 		// }
 
-		//	exposed next layer Prediction
+		//	exposed the Prediction
 		PredictData[i+1] = (m.Layers)[i+1].Exposed(PredictData[i+1])
 
 		//	loop next layer Prediction
@@ -140,27 +140,45 @@ func (m Module) batchUpdate(miniBatchInput, miniBatchTarget [][]float64, sampleR
 		thisBatchTarget := miniBatchTarget[start:end]
 
 		PredictData[0] = miniBatchInput[start:end]
+		ExposedData[0] = miniBatchInput[start:end]
 
 		// batch predict
-		for k := 0; k < sampleRate; k++ {
-			delta[len(m.Layers)-1][k] = m.Layers[len(m.Layers)-1].Cost(thisBatchTarget[k], PredictData[0][k])
-			for j := 0; j < len(m.Layers); j++ {
+		for j := 0; j < len(m.Layers); j++ {
+			for k := 0; k < sampleRate; k++ {
 				// PredictData [input -- layer end]
 				PredictData[j+1][k] = m.Layers[j].Predict(PredictData[j][k])
-				// ExposedData [1st predict -- output]
-				ExposedData[j][k] = m.Layers[j].Exposed(PredictData[j+1][k])
+				// ExposedData [input -- layer end]
+				ExposedData[j+1][k] = m.Layers[j].Exposed(PredictData[j+1][k])
 			}
-			for j := len(m.Layers); j > 0; j-- {
-				// delta []
-				delta[j][k] = m.Layers[j].Delta()
-			}
-
 		}
 
-		// target function
-		// ExposedData is nextPredict , PredictData is this Predict
-		// m.Layers[j].BatchUpdate(PredictData[j], ExposedData[j], delta[j])
-		// batch update the layer by sample rate
+		// init last layer delta
+		for k := 0; k < sampleRate; k++ {
+			delta[len(m.Layers)-1][k] = m.Layers[len(m.Layers)-1].Cost(thisBatchTarget[k], PredictData[0][k])
+		}
+
+		for j := len(m.Layers) - 2; j > 0; j-- {
+			for k := 0; k < sampleRate; k++ {
+				// delta []
+				delta[j][k] = m.Layers[j].Delta(delta[j+1][k], ExposedData[j][k], len(PredictData[j][i]))
+			}
+		}
+
+		for j := len(m.Layers) - 2; j >= 0; j-- {
+			m.Layers[j+1].UpdateCache(PredictData[j], ExposedData[j+1], delta[j])
+		}
+
+		// for j := range ExposedNextPredict {
+
+		// 	//change bias number by cost
+		// 	Delta[j] = Delta[j] * ExposedNextPredict[j]
+		// 	(*d.Bias)[j] += Delta[j] * d.LearningRate
+
+		// 	// change each weight by cost
+		// 	for k := range thisPredict {
+		// 		(*d.Neurons)[k][j] += Delta[j] * thisPredict[k] * d.LearningRate
+		// 	}
+		// }
 
 	}
 	return nil
