@@ -4,6 +4,12 @@ This is a flux like DNN module library that build by using standard library only
 
 it very easy to use
 
+
+
+
+
+
+
 # Predict
 
 ```go
