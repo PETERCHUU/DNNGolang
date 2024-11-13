@@ -25,8 +25,10 @@ shorting the score, use first 30% of score and directly output float point to ne
 other 70& randomly use different function to change the neuron,
 
 1. Nothing
-2. NewConnection
-3. New Node(Neuron?)
+2. NewConnection or delete connection?
+3. New Node(Neuron?) or delete if no connection?
 4. Change Weight and Bias
+
+if neuron no connection, delete the neuron
 
 Layer N+1
