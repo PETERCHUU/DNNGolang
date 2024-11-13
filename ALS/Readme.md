@@ -8,31 +8,38 @@ one of the rainforest model
 
 https://www.youtube.com/watch?v=EvV5Qtp_fYg
 
-each layer have three step
+## each layer have three step
 
-Layer N
+> Layer N
 
-## normal forwarding step
+### normal forwarding step
 
 each neuron output float point for next layer
 
-## Evaluation
+### Evaluation
 
 using each float point use fitness function output score
 
-## selection
+### selection
 
 shorting the score, use first 30% of score and directly output float point to next layer
 
-## mutation
+### mutation
 
 other 70& randomly use different function to change the neuron,
 
 1. Nothing
-2. NewConnection or delete connection?
-3. New Node(Neuron?) or delete if no connection?
+2. NewConnection
+3. New neuron add in middle
 4. Change Weight and Bias
 
-if neuron no connection, delete the neuron
+> Layer N+1
 
-Layer N+1
+# network work flow
+
+1. just making one layer for input , and one neuron for output layer,don't connect them
+2. change weight on neuron
+3. model find bad score, add connection to output layer
+4. model find bad score, add more neuron in middle
+5. add connection between new neuron and other neuron
+6. loop step 2 to 5
