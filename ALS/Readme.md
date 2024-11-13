@@ -42,4 +42,4 @@ other 70& randomly use different function to change the neuron,
 3. model find bad score, add connection to output layer
 4. model find bad score, add more neuron in middle
 5. add connection between new neuron and other neuron
-6. loop step 2 to 5
+6. loop step 2 to 5 until _confidence_ >= your expected
